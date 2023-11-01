@@ -9,16 +9,20 @@ class Person:
         surname: str = "",
         last_name: str = "",
     ):
-        self.username = username
-        self.password = password
+        # Атрибуты
+        self.username: str = username
+        self.password: str = password
 
-        self.age = age
-        self.last_name = last_name
-        self.surname = surname
-        self.first_name = first_name
-        self.email = email
+        self.age: int = age
+        self.last_name: str = last_name.capitalize()
+        self.surname: str = surname.capitalize()
+        self.first_name: str = first_name.capitalize()
+        self.email: str = email
 
-    def encrypt_password(self):
+        # Атрибут
+        self.full_name: str = f"{self.surname} {self.first_name} {self.last_name}"
+
+    def encrypt_password(self) -> None:
         self.password = self.password[::-1]
 
     def json(self) -> dict:
