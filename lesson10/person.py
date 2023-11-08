@@ -39,19 +39,30 @@ class Person:
             "email": self.email,
         }
 
-
-person1 = Person("igor", "<PASSWORD>")
-
-person2 = Person("user198", "i4y572ny3ik")
-
-
-print(person1.password)
-
-print("Я зашифрую свой пароль")
-
-person1.encrypt_password()
-
-print(person1.password)
+    @classmethod
+    def create_from_string(cls, s: str):
+        data = str(s).split("-")  # ["name", "password", "email"]
+        if len(data) == 3:
+            return cls(username=data[0], password=data[1], email=data[2])
+        # Создаем ошибку
+        print("Неверный формат!")
 
 
-print(person2.json())
+class Student(Person):
+    def study(self) -> None:
+        print("study")
+
+# Метод create_from_string, который принимает один параметр: s, и создает и
+# возвращает объект класса Person на основе строки s. Строка s должна иметь
+# формат “name-password-email”, где name - имя, password - пароль и email - почта. Этот
+# метод должен быть декорирован как classmethod
+
+
+person1 = Person.create_from_string("name-password-email")
+
+print(person1)
+
+student1 = Student.create_from_string("name-password-email")
+
+print(student1)
+
