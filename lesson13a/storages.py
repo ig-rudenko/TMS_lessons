@@ -1,4 +1,5 @@
 from .abstract import AbstractStorage
+from .types import Person
 
 
 class InMemoryStorage(AbstractStorage):
