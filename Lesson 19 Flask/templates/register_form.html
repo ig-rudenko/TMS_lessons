@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="/static-files/main.css">
+    <link rel="stylesheet" href="/static-files/register.css">
+
+</head>
+<body>
+
+    <h1 class="header">Регистрация</h1>
+
+    <form action="/register" method="post">
+        <!-- Блок username -->
+        <div class="input-block">  <!-- div это блок -->
+            <span>username</span>
+            <div>
+                <input class="input-form" name="username" type="text">
+            </div>
+        </div>
+
+        <!-- Блок email -->
+        <div class="input-block">
+            <span>email</span>
+            <div>
+                <input class="input-form" name="email" type="email">
+            </div>
+        </div>
+
+        <!-- Блок password -->
+        <div class="input-block">
+            <span>password</span>
+            <div>
+                <input class="input-form" name="password" type="password">
+            </div>
+        </div>
+
+        <!-- Блок описания -->
+        <div class="input-block">
+            <span>Описание</span>
+            <div>
+                <textarea rows="6" cols="22" name="content"></textarea>
+            </div>
+        </div>
+
+        <!-- Блок кнопки -->
+        <div class="input-block">
+            <input class="form-button" type="submit" value="Зарегистрироваться">
+        </div>
+
+    </form>
+
+</body>
+</html>

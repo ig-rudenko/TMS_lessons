@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Дополнительная информация о странице -->
+    <meta charset="UTF-8">
+    <title>Главная страница</title>
+
+    <!-- Добавляем ссылку на файл стилей -->
+    <link rel="stylesheet" href="/static-files/main.css">
+
+</head>
+<body>
+<!-- Тут располагается отображаемое содержимое  -->
+    <h1 class="header">
+        Hello, World!
+    </h1>
+    Тестовое приложение flask.
+
+    <div style="padding-top: 20px;">
+        <!-- Ссылка (Только метод GET) -->
+        <a href="/register">Зарегистрироваться</a>
+    </div>
+
+    <div class="content">
+
+        <!-- Создаем цикл, чтобы перебирать пользователей -->
+        {% for user in users %}
+            <div class="card">
+                <h3>
+
+                    <!-- Иконка пользователя -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                      <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                      <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                    </svg>
+
+                    <a href="/{{ user.username }}">{{ user.username }}</a></h3>
+                <div>
+                    <div>Email: {{ user.email }} </div>
+                    <div>Password: {{ user.password }} </div>
+                </div>
+            </div>
+        {% endfor %} <!-- Обязательно закрываем цикл -->
+
+    </div>
+
+
+</body>
+</html>
