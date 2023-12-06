@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime
+from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.engine import create_engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker, relationship
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 # Строка подключения (DSN)
 
@@ -33,9 +33,7 @@ class User(Base):
     username = Column(String(64), unique=True, nullable=False)
     password = Column(String(64), nullable=False)
     email = Column(String(200), unique=True, nullable=False)
-
-    # Далее внутренние связи для SQLAlchemy
-    posts = relationship("Post", back_populates="user")
+    is_active = Column(Boolean, default=False, nullable=False)
 
     def __str__(self):
         return f"User: {self.username}"

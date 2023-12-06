@@ -17,6 +17,7 @@ def create_user(username: str, password: str, email: str) -> User:
         conn.add(user)  # Добавляем.
         conn.commit()  # Подтверждаем создание.
         conn.refresh(user)  # Обновляем. Для чего? Получаем созданный ID из базы.
+    # Отправка email.
     return user
 
 
