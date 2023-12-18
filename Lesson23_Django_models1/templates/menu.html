@@ -23,15 +23,34 @@
           <a class="nav-link" href="{% url 'create-note' %}">Создать</a>
         </li>
 
+      {% if user.is_authenticated %}
+
+{#      Выход   #}
+        <li class="nav-item">
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button class="nav-link" type="submit">Выйти</button>
+            </form>
+        </li>
+
+      {% else %}
+
+{#      Вход   #}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'login' %}">Войти</a>
+        </li>
+
+      {% endif %}
+
       </ul>
 
 
 {#    Форма поиска (по умолчанию метод GET)   #}
-      <form class="d-flex" role="search" action="/">
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+      <form class="d-flex" action="{% url 'filter-notes' %}">
+        <input name="search" value="{{ search_value_form }}"
+               style="width: 400px" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
         <button class="btn btn-outline-success" type="submit">Search</button>
       </form>
-
 
     </div>
   </div>
