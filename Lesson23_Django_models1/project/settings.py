@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'posts.apps.PostsConfig',
 ]
 
-AUTH_USER_MODEL = "auth.User"
+AUTH_USER_MODEL = "posts.User"
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
@@ -84,6 +84,15 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
+
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': "tms_posts",
+    #     "USER": "django",
+    #     "PASSWORD": "django-password",
+    #     "HOST": "localhost",  # IP адрес или домен СУБД.
+    #     "PORT": 5432,
+    # }
 }
 
 
@@ -129,6 +138,13 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+
+# ============== Media =================
+MEDIA_ROOT = BASE_DIR / 'media'  # Корень для сохранения медиа файлов.
+# Префикс, по которому Django понимает,
+# что данный URL необходимо рассматривать как файл в папке с медиа.
+MEDIA_URL = 'media/'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

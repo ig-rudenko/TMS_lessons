@@ -1,19 +1,20 @@
 from django.shortcuts import render
 from django.urls import reverse
 from django.db.models import Q
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, HttpRequest
 from django.core.handlers.wsgi import WSGIRequest
 
-from .models import Note
+from .models import Note, User
 
 
-def home_page_view(request: WSGIRequest):
+def home_page_view(request: HttpRequest):
     """
     Обязательно! Каждая функция view должна принимать первым параметром request.
     """
     context: dict = {
         "notes": Note.objects.all()
     }
+    print(request.user)
     return render(request, "home.html", context)
 
 
@@ -74,10 +75,13 @@ def create_note_view(request: WSGIRequest):
         return render(request, "registration/login.html", {"errors": "Необходимо войти"})
 
     if request.method == "POST":
+        images: list | None = request.FILES.getlist("noteImage")
+
         note = Note.objects.create(
             title=request.POST["title"],
             content=request.POST["content"],
             user=request.user,
+            image=images[0] if images else None,
         )
         return HttpResponseRedirect(reverse('show-note', args=[note.uuid]))
 
@@ -94,3 +98,50 @@ def show_note_view(request: WSGIRequest, note_uuid):
         raise Http404
 
     return render(request, "note.html", {"note": note})
+
+
+def delete_note_view(request: WSGIRequest, note_uuid: str):
+    if request.method == "POST":
+        Note.objects.filter(uuid=note_uuid).delete()
+    return HttpResponseRedirect(reverse("home"))
+
+
+def register(request: WSGIRequest):
+    if request.method != "POST":
+        return render(request, "registration/register.html")
+    print(request.POST)
+    if not request.POST.get("username") or not request.POST.get("email") or not request.POST.get("password1"):
+        return render(
+            request,
+            "registration/register.html",
+            {"errors": "Укажите все поля!"}
+        )
+    print(User.objects.filter(
+            Q(username=request.POST["username"]) | Q(email=request.POST["email"])
+    ))
+    # Если уже есть такой пользователь с username или email.
+    if User.objects.filter(
+            Q(username=request.POST["username"]) | Q(email=request.POST["email"])
+    ).count() > 0:
+        return render(
+            request,
+            "registration/register.html",
+            {"errors": "Если уже есть такой пользователь с username или email"}
+        )
+
+    # Сравниваем два пароля!
+    if request.POST.get("password1") != request.POST.get("password2"):
+        return render(
+            request,
+            "registration/register.html",
+            {"errors": "Пароли не совпадают"}
+        )
+
+    # Создадим учетную запись пользователя.
+    # Пароль надо хранить в БД в шифрованном виде.
+    User.objects.create_user(
+        username=request.POST["username"],
+        email=request.POST["email"],
+        password=request.POST["password1"]
+    )
+    return HttpResponseRedirect(reverse('home'))
