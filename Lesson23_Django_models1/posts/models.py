@@ -20,6 +20,13 @@ class User(AbstractUser):
         db_table = "users"
 
 
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 def upload_to(instance: "Note", filename: str) -> str:
     """Путь для файла относительно корня медиа хранилища."""
     return f"{instance.uuid}/{filename}"
@@ -32,8 +39,10 @@ class Note(models.Model):
     title = models.CharField(max_length=255)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    image = models.FileField(upload_to=upload_to, null=True)  # TODO: ImageField
+    image = models.ImageField(upload_to=upload_to, null=True)
     # auto_now_add=True автоматически добавляет текущую дату и время.
+
+    tags = models.ManyToManyField(Tag, related_name="notes")
 
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     # `on_delete=models.CASCADE`
@@ -46,6 +55,9 @@ class Note(models.Model):
     class Meta:
         # db_table = 'notes'  # Название таблицы в базе.
         ordering = ['-created_at']  # Дефис это означает DESC сортировку (обратную).
+        indexes = [
+            models.Index(fields=("created_at",), name="created_at_index"),
+        ]
 
 
 @receiver(post_delete, sender=Note)

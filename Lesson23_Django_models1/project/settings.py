@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-w@ff4kv3=u8q46@8jdcgdn%1nn3jo(47pq1_5#+z0rd$e2220b
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+INTERNAL_IPS = ["127.0.0.1"]
 
 # Application definition
 
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'posts.apps.PostsConfig',
+    "debug_toolbar",
 ]
 
 AUTH_USER_MODEL = "posts.User"
@@ -53,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -81,18 +83,13 @@ WSGI_APPLICATION = 'project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': "tms_posts",
+        "USER": "django",
+        "PASSWORD": "password",
+        "HOST": "127.0.0.1",  # IP адрес или домен СУБД.
+        "PORT": 5432,
     }
-
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': "tms_posts",
-    #     "USER": "django",
-    #     "PASSWORD": "django-password",
-    #     "HOST": "localhost",  # IP адрес или домен СУБД.
-    #     "PORT": 5432,
-    # }
 }
 
 

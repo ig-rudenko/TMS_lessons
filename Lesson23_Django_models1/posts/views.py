@@ -1,21 +1,39 @@
 from django.shortcuts import render
 from django.urls import reverse
-from django.db.models import Q
+from django.db.models import Q, F
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, Http404, HttpRequest
 from django.core.handlers.wsgi import WSGIRequest
 
 from .models import Note, User
+from .service import create_note
 
 
 def home_page_view(request: HttpRequest):
     """
     Обязательно! Каждая функция view должна принимать первым параметром request.
     """
-    context: dict = {
-        "notes": Note.objects.all()
-    }
-    print(request.user)
-    return render(request, "home.html", context)
+
+    queryset = (
+        Note.objects.all()  # Получение всех объектов из таблицы Note
+        .select_related("user")  # Вытягивание связанных данных из таблицы User в один запрос
+        .prefetch_related("tags")  # Вытягивание связанных данных из таблицы Tag в отдельные запросы
+        .annotate(
+            # Создание нового вычисляемого поля username из связанной таблицы User
+            username=F('user__username'),
+
+            # Создание массива уникальных имен тегов для каждой заметки
+            tag_names=ArrayAgg('tags__name', distinct=True)
+        )
+        .values("uuid", "title", "created_at", "username", "tag_names")  # Выбор только указанных полей для результата
+        .distinct()  # Убирание дубликатов, если они есть
+        .order_by("-created_at")  # Сортировка результатов по убыванию по полю created_at
+    )
+
+    print(queryset.query)
+
+    return render(request, "home.html", {"notes": queryset[:100]})
 
 
 def filter_notes_view(request: WSGIRequest):
@@ -45,7 +63,8 @@ def filter_notes_view(request: WSGIRequest):
 
         # Оператор - `|` Означает `ИЛИ`.
         # Оператор - `&` Означает `И`.
-        notes_queryset = Note.objects.filter(Q(title__icontains=search) | Q(content__icontains=search))
+        # notes_queryset = Note.objects.filter(Q(title__icontains=search) | Q(content__icontains=search))
+        notes_queryset = Note.objects.filter(title=search)
 
     else:
         # Если нет строки поиска.
@@ -61,28 +80,16 @@ def filter_notes_view(request: WSGIRequest):
     print(notes_queryset.query)
 
     context: dict = {
-        "notes": notes_queryset,
+        "notes": notes_queryset[:100],
         "search_value_form": search,
     }
     return render(request, "home.html", context)
 
 
+@login_required
 def create_note_view(request: WSGIRequest):
-    print(request.user)  # В каждом запросе есть пользователь!
-    # НО, только если он вошел на сайте, в ином случае это аноним.
-
-    if not request.user.is_authenticated:
-        return render(request, "registration/login.html", {"errors": "Необходимо войти"})
-
     if request.method == "POST":
-        images: list | None = request.FILES.getlist("noteImage")
-
-        note = Note.objects.create(
-            title=request.POST["title"],
-            content=request.POST["content"],
-            user=request.user,
-            image=images[0] if images else None,
-        )
+        note = create_note(request)
         return HttpResponseRedirect(reverse('show-note', args=[note.uuid]))
 
     # Вернется только, если метод не POST.

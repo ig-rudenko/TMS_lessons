@@ -31,5 +31,6 @@ urlpatterns = [
     path("create", views.create_note_view, name="create-note"),
     path("post/<note_uuid>", views.show_note_view, name="show-note"),
     path("post/<note_uuid>/delete", views.delete_note_view, name="delete-note"),
-    re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT})
+    re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
+    path("__debug__/", include("debug_toolbar.urls")),
 ]
