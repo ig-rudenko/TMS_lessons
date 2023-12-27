@@ -29,8 +29,10 @@ urlpatterns = [
     path("", views.home_page_view, name="home"),  # Добавим главную страницу.
     path("filter", views.filter_notes_view, name="filter-notes"),
     path("create", views.create_note_view, name="create-note"),
+    path("user/<username>/notes", views.user_notes, name="user-notes"),
     path("post/<note_uuid>", views.show_note_view, name="show-note"),
     path("post/<note_uuid>/delete", views.delete_note_view, name="delete-note"),
     re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
     path("__debug__/", include("debug_toolbar.urls")),
+    path('ckeditor/', include('ckeditor_uploader.urls')),
 ]

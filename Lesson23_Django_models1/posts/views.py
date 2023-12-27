@@ -1,13 +1,12 @@
 from django.shortcuts import render
 from django.urls import reverse
-from django.db.models import Q, F
-from django.contrib.postgres.aggregates import ArrayAgg
+from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, Http404, HttpRequest
 from django.core.handlers.wsgi import WSGIRequest
 
 from .models import Note, User
-from .service import create_note
+from .service import create_note, filter_notes, queryset_optimization
 
 
 def home_page_view(request: HttpRequest):
@@ -15,21 +14,7 @@ def home_page_view(request: HttpRequest):
     Обязательно! Каждая функция view должна принимать первым параметром request.
     """
 
-    queryset = (
-        Note.objects.all()  # Получение всех объектов из таблицы Note
-        .select_related("user")  # Вытягивание связанных данных из таблицы User в один запрос
-        .prefetch_related("tags")  # Вытягивание связанных данных из таблицы Tag в отдельные запросы
-        .annotate(
-            # Создание нового вычисляемого поля username из связанной таблицы User
-            username=F('user__username'),
-
-            # Создание массива уникальных имен тегов для каждой заметки
-            tag_names=ArrayAgg('tags__name', distinct=True)
-        )
-        .values("uuid", "title", "created_at", "username", "tag_names")  # Выбор только указанных полей для результата
-        .distinct()  # Убирание дубликатов, если они есть
-        .order_by("-created_at")  # Сортировка результатов по убыванию по полю created_at
-    )
+    queryset = queryset_optimization(Note.objects.all())
 
     print(queryset.query)
 
@@ -44,43 +29,12 @@ def filter_notes_view(request: WSGIRequest):
     """
 
     search: str = request.GET.get("search", "")  # `get` - получение по ключу. Если такого нет, то - "",
-
-    # Если строка поиска не пустая, то фильтруем записи по ней.
-    if search:
-        # ❗️Нет обращения к базе❗️
-        # Через запятую запросы формируются c ❗️AND❗️
-        # notes_queryset = Note.objects.filter(title__icontains=search, content__icontains=search)
-        # SELECT "posts_note"."uuid", "posts_note"."title", "posts_note"."content", "posts_note"."created_at"
-        # FROM "posts_note" WHERE (
-        # "posts_note"."title" LIKE %search% ESCAPE '\' AND "posts_note"."content" LIKE %search% ESCAPE '\')
-
-        # ❗️Все импорты сверху файла❗️
-        # from django.db.models import Q
-
-        notes_queryset = Note.objects.filter(title__icontains=search, content__icontains=search)
-        # Аналогия
-        notes_queryset = Note.objects.filter(Q(title__icontains=search), Q(content__icontains=search))
-
-        # Оператор - `|` Означает `ИЛИ`.
-        # Оператор - `&` Означает `И`.
-        # notes_queryset = Note.objects.filter(Q(title__icontains=search) | Q(content__icontains=search))
-        notes_queryset = Note.objects.filter(title=search)
-
-    else:
-        # Если нет строки поиска.
-        notes_queryset = Note.objects.all()  # Получение всех записей из модели.
-
-    notes_queryset = notes_queryset.order_by("-created_at")  # ❗️Нет обращения к базе❗️
-
-    # SELECT "posts_note"."uuid", "posts_note"."title", "posts_note"."content", "posts_note"."created_at"
-    # FROM "posts_note" WHERE
-    # ("posts_note"."title" LIKE %python% ESCAPE '\' OR "posts_note"."content" LIKE %python% ESCAPE '\')
-    # ORDER BY "posts_note"."created_at" DESC
-
-    print(notes_queryset.query)
+    queryset = queryset_optimization(
+        filter_notes(search)
+    )
 
     context: dict = {
-        "notes": notes_queryset[:100],
+        "notes": queryset[:100],
         "search_value_form": search,
     }
     return render(request, "home.html", context)
@@ -152,3 +106,17 @@ def register(request: WSGIRequest):
         password=request.POST["password1"]
     )
     return HttpResponseRedirect(reverse('home'))
+
+
+def user_notes(request: WSGIRequest, username: str):
+    queryset = queryset_optimization(
+        Note.objects.filter(user__username=username)
+    )
+    # SELECT * FROM "posts_note"
+    # INNER JOIN "users" ON ("posts_note"."user_id" = "users"."id")
+    # WHERE "users"."username" = boris1992
+    # ORDER BY "posts_note"."created_at" DESC
+
+    print(Note.objects.filter(user__username=username).query)
+
+    return render(request, "posts-list.html", {"notes": queryset})
