@@ -7,7 +7,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
-from ckeditor.fields import RichTextField
+from ckeditor_uploader.fields import RichTextUploadingField
 
 
 class User(AbstractUser):
@@ -38,7 +38,7 @@ class Note(models.Model):
 
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=255, verbose_name="Заголовок", help_text="Укажите не более 255 символов")
-    content = RichTextField(verbose_name="Содержимое")
+    content = RichTextUploadingField(verbose_name="Содержимое")
     created_at = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(upload_to=upload_to, null=True, blank=True, verbose_name="Превью")
     # auto_now_add=True автоматически добавляет текущую дату и время.
