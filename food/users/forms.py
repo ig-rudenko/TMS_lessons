@@ -6,8 +6,8 @@ from users.models import User
 class RegisterForm(forms.Form):
     username = forms.CharField(min_length=3, max_length=150)
     email = forms.EmailField(max_length=256)
-    password1 = forms.CharField(widget=forms.PasswordInput)
-    password2 = forms.CharField(widget=forms.PasswordInput)
+    password1 = forms.CharField(widget=forms.PasswordInput, label="Пароль")
+    password2 = forms.CharField(widget=forms.PasswordInput, label="Повторите пароль")
 
     # Методы для валидации полей называются: `clean_` + `название поля`
     def clean_username(self):

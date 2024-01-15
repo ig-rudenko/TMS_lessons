@@ -15,7 +15,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import serve
+from django.urls import path, include, re_path
 
 from app.views import home
 
@@ -27,4 +29,5 @@ urlpatterns = [
     path("account/", include("users.urls")),  # связь с приложением users.
     path("recipe/", include("app.urls")),  # связь с приложением app.
     path('ckeditor/', include('ckeditor_uploader.urls')),
+    re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
 ]

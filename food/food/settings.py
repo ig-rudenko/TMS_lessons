@@ -37,9 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "django.contrib.postgres",
+    "crispy_forms",
+    "crispy_bootstrap5",
     'users',
     'app',
     "ckeditor",
+    "ckeditor_uploader",
 ]
 
 MIDDLEWARE = [
@@ -83,8 +87,12 @@ AUTH_USER_MODEL = "users.User"
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': "food",
+        "USER": "django",
+        "PASSWORD": "password",
+        "HOST": "127.0.0.1",  # IP адрес или домен СУБД.
+        "PORT": 5432,
     }
 }
 
@@ -137,6 +145,8 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 CKEDITOR_UPLOAD_PATH = 'uploads/'
 
