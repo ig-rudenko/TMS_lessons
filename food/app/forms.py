@@ -10,10 +10,5 @@ class RecipeForm(forms.ModelForm):
         model = Recipe
         fields = ["name", "preview_image", "time_minutes", "category", "ingredients", "description"]
         widgets = {
-            "name": forms.TextInput(attrs={"class": "form-control"}),
-            "preview_image": forms.FileInput(attrs={"class": "form-control"}),
-            "time_minutes": forms.NumberInput(attrs={"class": "form-control"}),
-            "category": forms.Select(attrs={"class": "form-control"}),
-            "ingredients": forms.SelectMultiple(attrs={"class": "form-control"}),
             "description": CKEditorWidget()
         }
