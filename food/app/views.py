@@ -10,7 +10,7 @@ from .models import Recipe
 
 
 def home(request: WSGIRequest):
-    recipes = (
+    recipes_queryset = (
         Recipe.objects.all()
         .prefetch_related("ingredients")
         .annotate(
@@ -22,11 +22,11 @@ def home(request: WSGIRequest):
 
     search = request.GET.get("search")
     if search:
-        recipes = recipes.filter(description__search=search)
+        recipes_queryset = recipes_queryset.filter(description__search=search)
 
-    print(recipes.query)
+    print(recipes_queryset.query)
 
-    return render(request, 'home.html', {"recipes": recipes})
+    return render(request, 'home.html', {"recipes": recipes_queryset})
 
 
 @login_required

@@ -13,7 +13,7 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название рецепта")
     description = models.TextField(verbose_name="Описание рецепта")
-    preview_image = models.ImageField(upload_to='images/', verbose_name="Картинка")
+    preview_image = models.CharField(max_length=255, verbose_name="Картинка")
     created_at = models.DateTimeField(auto_now_add=True)
     time_minutes = models.IntegerField(
         validators=[MinValueValidator(1)],
@@ -33,3 +33,10 @@ class Recipe(models.Model):
 
     class Meta:
         ordering = ("-created_at",)
+
+    @property
+    def verbose_category(self) -> str:
+        for value, label in self.Category.choices:
+            if value == self.category:
+                return label
+        return "Unknown category"

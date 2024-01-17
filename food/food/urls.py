@@ -26,7 +26,7 @@ from app.views import home
 urlpatterns = [
     path('', home, name="home"),
     path('admin/', admin.site.urls),
-    path("api/", include("app.api.urls")),
+    path("api/recipes/", include("app.api.urls")),
     path("account/", include("users.urls")),  # связь с приложением users.
     path("recipe/", include("app.urls")),  # связь с приложением app.
     path('ckeditor/', include('ckeditor_uploader.urls')),
