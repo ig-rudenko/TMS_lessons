@@ -14,11 +14,13 @@ class RegisterForm(forms.Form):
         username = self.cleaned_data.get('username')
         if username and User.objects.filter(username=username).exists():
             raise forms.ValidationError('Пользователь с таким username уже существует')
+        return username
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if email and User.objects.filter(email=email).exists():
             raise forms.ValidationError('Пользователь с таким email уже существует')
+        return email
 
     # Общая проверка после проверки всех полей.
     def clean(self):
