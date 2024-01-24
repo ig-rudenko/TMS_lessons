@@ -23,7 +23,17 @@
           <a class="nav-link active" aria-current="page" href="/">Home</a>
         </li>
 
-{#      Создать заметку   #}
+{#      Избранные рецепты   #}
+      {% if favorites_ids %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'show-favorite-recipes' %}">
+              Избранные
+              <span class="badge rounded-pill bg-danger">{{ favorites_ids | length }}</span>
+          </a>
+        </li>
+      {% endif %}
+
+{#      Создать рецепт   #}
         <li class="nav-item">
           <a class="nav-link" href="{% url 'create-recipe' %}">Создать</a>
         </li>
