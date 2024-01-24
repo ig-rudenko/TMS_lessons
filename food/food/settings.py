@@ -85,7 +85,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'food.wsgi.application'
 
-APPEND_SLASH = False
 AUTH_USER_MODEL = "users.User"
 
 # Database

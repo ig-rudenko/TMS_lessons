@@ -21,6 +21,7 @@ from django.urls import path, include, re_path
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
+    TokenVerifyView,
 )
 
 from app.views import home
@@ -33,10 +34,12 @@ urlpatterns = [
     path("api/recipes/", include("app.api.urls")),
     # Token
     path("api/auth/", include("djoser.urls.authtoken")),
-    path("api/auth/", include("djoser.urls")),
+    path("api/auth/", include("djoser.urls.jwt")),
+    path("api/auth/", include("djoser.urls.base")),
     # JWT
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     # Other
     path("account/", include("users.urls")),  # связь с приложением users.
     path("recipe/", include("app.urls")),  # связь с приложением app.
