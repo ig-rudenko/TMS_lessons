@@ -4,8 +4,10 @@ from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views import View
+from django.db.models import Case, When
 from django.contrib.postgres.aggregates import ArrayAgg
 
+from .cache import get_or_cache
 from .favorite_service import FavoriteRecipesService
 from .forms import RecipeForm
 from .models import Recipe
@@ -24,11 +26,11 @@ def home(request: WSGIRequest):
 
     search = request.GET.get("search")
     if search:
-        recipes_queryset = recipes_queryset.filter(description__search=search)
+        recipes_data = recipes_queryset.filter(description__search=search)
+    else:
+        recipes_data = get_or_cache("home-page-recipes", recipes_queryset)
 
-    print(recipes_queryset.query)
-
-    return render(request, 'home.html', {"recipes": recipes_queryset})
+    return render(request, 'home.html', {"recipes": recipes_data})
 
 
 @login_required
@@ -76,7 +78,9 @@ class ListFavoriteRecipesView(View):
         Метод `get` вызывается автоматический, когда HTTP метод запроса является `GET`.
         """
         favorite_service = FavoriteRecipesService(request)
-        queryset = Recipe.objects.filter(id__in=favorite_service.favorites_ids)
+        ids = favorite_service.favorites_ids[::-1]
+        ordering = Case(*[When(id=ident, then=pos) for pos, ident in enumerate(ids)])
+        queryset = Recipe.objects.filter(id__in=ids).order_by(ordering)
         return render(request, "home.html", {"recipes": queryset})
 
 

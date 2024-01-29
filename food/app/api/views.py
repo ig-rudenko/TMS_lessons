@@ -12,6 +12,7 @@ from django.conf import settings
 from app.models import Recipe
 from .permissions import IsOwnerOrReadOnly
 from .serializers import RecipeListSerializer, RecipeCreateSerializer, RecipeDetailSerializer, RecipeSerializer, ImageSerializer
+from .swagger.schemas import recipes_api_doc
 
 
 class RecipeListCreateAPIView(ListCreateAPIView):
@@ -24,6 +25,10 @@ class RecipeListCreateAPIView(ListCreateAPIView):
     search_fields = ['@name', '@description']  # Используем полнотекстовый поиск Postgres
     ordering_fields = ["created_at", "time_minutes", "user_username"]
     pagination_class = PageNumberPagination
+
+    @recipes_api_doc
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 
     def get_serializer_class(self):
         """В зависимости от метода HTTP возвращает соответствующий класс для создания сериализатора"""

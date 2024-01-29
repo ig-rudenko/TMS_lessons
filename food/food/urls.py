@@ -19,12 +19,13 @@ from django.conf import settings
 from django.conf.urls.static import serve
 from django.urls import path, include, re_path
 from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
     TokenRefreshView,
     TokenVerifyView,
 )
 
 from app.views import home
+from users.api.views import DecoratedTokenObtainPairView
+from .swagger import schema_view
 
 # /
 
@@ -34,10 +35,8 @@ urlpatterns = [
     path("api/recipes/", include("app.api.urls")),
     # Token
     path("api/auth/", include("djoser.urls.authtoken")),
-    path("api/auth/", include("djoser.urls.jwt")),
-    path("api/auth/", include("djoser.urls.base")),
     # JWT
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/', DecoratedTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     # Other
@@ -45,4 +44,9 @@ urlpatterns = [
     path("recipe/", include("app.urls")),  # связь с приложением app.
     path('ckeditor/', include('ckeditor_uploader.urls')),
     re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
+    path("__debug__/", include("debug_toolbar.urls")),
+    # DOCS
+    path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]

@@ -25,8 +25,7 @@ SECRET_KEY = 'django-insecure-d%o#*9u874te1lr=fe94w323^!1qr%&_51%oepqp2$o7-p*c^2
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
-# Application definition
+INTERNAL_IPS = ["127.0.0.1"]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -47,6 +46,8 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "djoser",
     "rest_framework_simplejwt.token_blacklist",
+    "debug_toolbar",
+    "drf_yasg",
 ]
 
 MIDDLEWARE = [
@@ -58,7 +59,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "debug_toolbar.middleware.DebugToolbarMiddleware"
 ]
+
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
 ROOT_URLCONF = 'food.urls'
 LOGIN_REDIRECT_URL = "/"
@@ -97,6 +102,18 @@ DATABASES = {
         "PASSWORD": "password",
         "HOST": "127.0.0.1",  # IP адрес или домен СУБД.
         "PORT": 5432,
+    }
+}
+
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "KEY_PREFIX": "test_django_food_" if DEBUG else "django_food_",
+        "OPTIONS": {
+            "MAX_ENTRIES": 10,
+            "CULL_FREQUENCY": 2,  # 1/2
+        },
     }
 }
 
@@ -279,4 +296,15 @@ SIMPLE_JWT = {
     "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
+}
+
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    },
 }
