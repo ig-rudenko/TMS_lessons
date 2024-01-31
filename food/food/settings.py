@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
+import os
 from datetime import timedelta
 from pathlib import Path
 
@@ -19,12 +20,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-d%o#*9u874te1lr=fe94w323^!1qr%&_51%oepqp2$o7-p*c^2'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-d%o#*9u874te1lr=fe94w323^!1qr%&_51%oepqp2$o7-p*c^2')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', '0') == "1"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]  # Разрешаем все IP.
 INTERNAL_IPS = ["127.0.0.1"]
 
 INSTALLED_APPS = [
@@ -46,9 +47,13 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "djoser",
     "rest_framework_simplejwt.token_blacklist",
-    "debug_toolbar",
     "drf_yasg",
 ]
+
+if DEBUG:
+    INSTALLED_APPS += [
+        "debug_toolbar",
+    ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -59,8 +64,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "debug_toolbar.middleware.DebugToolbarMiddleware"
 ]
+
+if DEBUG:
+    MIDDLEWARE += [
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+    ]
 
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
@@ -97,25 +106,37 @@ AUTH_USER_MODEL = "users.User"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': "food",
-        "USER": "django",
-        "PASSWORD": "password",
-        "HOST": "127.0.0.1",  # IP адрес или домен СУБД.
+        'NAME': os.environ.get("DATABASE_NAME"),
+        "USER": os.environ.get("DATABASE_USER"),
+        "PASSWORD": os.environ.get("DATABASE_PASSWORD"),
+        "HOST": os.environ.get("DATABASE_HOST"),  # IP адрес или домен СУБД.
         "PORT": 5432,
     }
 }
 
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "KEY_PREFIX": "test_django_food_" if DEBUG else "django_food_",
-        "OPTIONS": {
-            "MAX_ENTRIES": 10,
-            "CULL_FREQUENCY": 2,  # 1/2
-        },
+REDIS_CACHE = os.environ.get("REDIS_CACHE_URL")
+
+if REDIS_CACHE:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": REDIS_CACHE,
+            "KEY_PREFIX": "test_django_food_" if DEBUG else "django_food_",
+        }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "KEY_PREFIX": "test_django_food_" if DEBUG else "django_food_",
+            "OPTIONS": {
+                "MAX_ENTRIES": 10,
+                "CULL_FREQUENCY": 2,  # 1/2
+            },
+        }
+    }
+
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
@@ -166,9 +187,9 @@ EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
-EMAIL_HOST_USER = 'ig.rudenko1@yandex.ru'
-DEFAULT_FROM_EMAIL = 'ig.rudenko1@yandex.ru'
-EMAIL_HOST_PASSWORD = 'urhjhvznsaxvtmbk'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', "")
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', "")
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', "")
 
 
 # Static files (CSS, JavaScript, Images)
