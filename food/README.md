@@ -1,2 +1,16 @@
 ## Проект на django
 
+## Настройка
+
+Переменные окружения
+
+    DJANGO_SECRET_KEY
+    DJANGO_DEBUG
+    DATABASE_NAME
+    DATABASE_USER
+    DATABASE_PASSWORD
+    DATABASE_HOST
+    REDIS_CACHE_URL
+    EMAIL_HOST_USER
+    DEFAULT_FROM_EMAIL
+    EMAIL_HOST_PASSWORD
