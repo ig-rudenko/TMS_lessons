@@ -196,9 +196,14 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', "")
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static'
-]
+
+if os.environ.get("COLLECT_STATIC"):
+    STATIC_ROOT = "/var/www/django-food/static/"
+
+else:
+    STATICFILES_DIRS = [
+        BASE_DIR / 'static'
+    ]
 
 # ===================== MEDIA =========================
 MEDIA_URL = "media/"
