@@ -28,7 +28,7 @@ class BaseEmailSender:
 
     def send_mail(self):
         mail = EmailMultiAlternatives(
-            subject=self.get_subject() + " на сайте " + self._get_domain(),
+            subject=self.get_subject() + " на сайте " + self._domain,
             to=[self._user.email]
         )
         mail.attach_alternative(self._get_mail_body(), "text/html")
