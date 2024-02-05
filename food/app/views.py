@@ -11,9 +11,13 @@ from .cache import get_or_cache
 from .favorite_service import FavoriteRecipesService
 from .forms import RecipeForm
 from .models import Recipe
+from .tasks import home_page_task
 
 
 def home(request: WSGIRequest):
+
+    home_page_task.delay(str(request.user))  # Отправка в очередь этого задания.
+
     recipes_queryset = (
         Recipe.objects.all()
         .prefetch_related("ingredients")
