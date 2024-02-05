@@ -1,3 +1,4 @@
+from django.contrib.sites.shortcuts import get_current_site
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse
@@ -8,7 +9,7 @@ from django.contrib.auth.tokens import default_token_generator
 
 from .models import User
 from .forms import RegisterForm
-from .email import ConfirmUserRegisterEmailSender
+from .tasks import send_register_email_task
 
 
 def register_view(request: WSGIRequest):
@@ -25,7 +26,9 @@ def register_view(request: WSGIRequest):
             )
 
             # Подтверждение по email.
-            ConfirmUserRegisterEmailSender(request, user).send_mail()
+            domain = str(get_current_site(request))
+
+            send_register_email_task.delay(domain, user.id)
 
             return HttpResponseRedirect(reverse("login"))
 
