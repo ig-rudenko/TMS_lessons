@@ -24,6 +24,7 @@ gunicorn = "^21.2.0"
 redis = "^5.0.1"
 celery = {extras = ["amqp", "redis"], version = "^5.3.6"}
 language-tool-python = "^2.7.1"
+flower = "^2.0.1"
 
 
 [build-system]
