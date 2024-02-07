@@ -24,10 +24,10 @@ def send_periodical_email():
 
 @shared_task(ignore_result=True, max_retries=3, autoretry_for=(Exception,))
 def send_email_task(message: str, email: str, subject: str):
+    print("sending email", email, subject, message)
+
     if not email or not message:
         return
-
-    print("sending email", email, subject, message)
 
     mail = EmailMultiAlternatives(
         subject=subject,
