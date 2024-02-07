@@ -1,6 +1,8 @@
 from celery import shared_task
 from django.contrib.auth import get_user_model
+from django.contrib.postgres.aggregates.general import ArrayAgg
 from django.core.mail import EmailMultiAlternatives
+from django.core.cache import cache
 
 import language_tool_python
 
@@ -70,3 +72,17 @@ def check_recipe_content(recipe_id: int) -> str:
     text_result += f"<h2>У вас было найдено: {len(matches)} ошибок"
 
     return text_result
+
+
+@shared_task(ignore_result=True)
+def update_home_page_cache_recipes() -> None:
+    recipes_queryset = (
+        Recipe.objects.all()
+        .prefetch_related("ingredients")
+        .annotate(
+            # Создание массива уникальных имен тегов для каждой заметки
+            ingredients_list=ArrayAgg('ingredients__name', distinct=True)
+        )
+        .values("id", "name", "time_minutes", "preview_image", "ingredients_list", "category")
+    )
+    cache.set("home-page-recipes", list(recipes_queryset), timeout=60)
