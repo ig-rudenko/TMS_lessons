@@ -9,7 +9,7 @@ from django.contrib.auth.tokens import default_token_generator
 
 from .models import User
 from .forms import RegisterForm
-from .tasks import send_register_email_task
+from .tasks import send_register_email_task, delete_user
 
 
 def register_view(request: WSGIRequest):
@@ -28,7 +28,9 @@ def register_view(request: WSGIRequest):
             # Подтверждение по email.
             domain = str(get_current_site(request))
 
-            send_register_email_task.delay(domain, user.id)
+            # send_register_email_task.delay(domain, user.id)
+            send_register_email_task.apply_async(args=[domain, user.id])
+            delete_user.apply_async(args=[user.id], countdown=20)
 
             return HttpResponseRedirect(reverse("login"))
 

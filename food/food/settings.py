@@ -13,6 +13,8 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from celery.schedules import crontab
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -337,5 +339,15 @@ SWAGGER_SETTINGS = {
 
 
 # ======================== CELERY =============================
+
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND')  # 'redis://localhost:6379/1'
+CELERY_TIMEZONE = TIME_ZONE
+
+CELERY_BEAT_SCHEDULE = {
+    "send_periodical_email": {
+        "task": "app.tasks.send_periodical_email",
+        "schedule": 30,
+        # "schedule": crontab(minute="0", hour="21")
+    }
+}
