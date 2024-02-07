@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "djoser",
     "rest_framework_simplejwt.token_blacklist",
     "drf_yasg",
+    "django_celery_beat",
 ]
 
 if DEBUG:
