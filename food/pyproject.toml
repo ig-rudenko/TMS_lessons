@@ -25,6 +25,7 @@ redis = "^5.0.1"
 celery = {extras = ["amqp", "redis"], version = "^5.3.6"}
 language-tool-python = "^2.7.1"
 flower = "^2.0.1"
+django-celery-beat = { git = "https://github.com/celery/django-celery-beat.git", rev = "f66796b9c5c9e47d118cb5b41d970f07cce72bbe" }
 
 
 [build-system]
