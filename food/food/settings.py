@@ -345,10 +345,10 @@ CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND')  # 'redis://localhost:6379/1'
 CELERY_TIMEZONE = TIME_ZONE
 
-CELERY_BEAT_SCHEDULE = {
-    "send_periodical_email": {
-        "task": "app.tasks.send_periodical_email",
-        "schedule": 30,
-        # "schedule": crontab(minute="0", hour="21")
-    }
-}
+# CELERY_BEAT_SCHEDULE = {
+#     "send_periodical_email": {
+#         "task": "app.tasks.send_periodical_email",
+#         "schedule": 30,
+#         # "schedule": crontab(minute="0", hour="21")
+#     }
+# }
