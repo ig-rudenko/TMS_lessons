@@ -27,6 +27,8 @@ def send_email_task(message: str, email: str, subject: str):
     if not email or not message:
         return
 
+    print("sending email", email, subject, message)
+
     mail = EmailMultiAlternatives(
         subject=subject,
         to=[email]
