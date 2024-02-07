@@ -18,7 +18,11 @@ class RecipeForm(forms.ModelForm):
 
     def save(self, commit=True):
         image: InMemoryUploadedFile = self.cleaned_data["preview_image"]
-        with open(f"{settings.MEDIA_ROOT}/images/{image.name}", "bw") as image_file:
+
+        image_folder_path = settings.MEDIA_ROOT / "images"
+        image_folder_path.mkdir(parents=True, exist_ok=True)
+
+        with (image_folder_path / image.name).open("bw") as image_file:
             image_file.write(image.read())
         self.instance.preview_image = f"images/{image.name}"
         return super().save(commit)

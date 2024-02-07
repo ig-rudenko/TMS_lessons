@@ -165,6 +165,9 @@ class UploadImageAPIView(GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         image: InMemoryUploadedFile = serializer.validated_data["image"]
-        with open(f"{settings.MEDIA_ROOT}/images/{image.name}", "bw") as image_file:
+        image_folder_path = settings.MEDIA_ROOT / "images"
+        image_folder_path.mkdir(parents=True, exist_ok=True)
+
+        with (image_folder_path / image.name).open("bw") as image_file:
             image_file.write(image.read())
         return Response({"name": image.name, "url": "images/" + image.name})
