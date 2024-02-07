@@ -3,6 +3,9 @@ from django.contrib.auth import get_user_model
 from django.core.mail import EmailMultiAlternatives
 
 import language_tool_python
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+
 from app.models import Recipe
 
 User = get_user_model()
@@ -22,9 +25,12 @@ def send_periodical_email():
 
 
 @shared_task(ignore_result=True, max_retries=3, autoretry_for=(Exception,))
-def send_email_task(message: str, email: str, subject: str):
+def send_email_task(message: str, email: str, subject: str, encoding_base64=False):
     if not email or not message:
         return
+
+    if encoding_base64:
+        message = force_str(urlsafe_base64_decode(message))
 
     mail = EmailMultiAlternatives(
         subject=subject,
@@ -66,4 +72,4 @@ def check_recipe_content(recipe_id: int) -> str:
     text_result = styles + text_result
     text_result += f"<h2>У вас было найдено: {len(matches)} ошибок"
 
-    return text_result
+    return urlsafe_base64_encode(force_bytes(text_result))
