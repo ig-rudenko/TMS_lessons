@@ -52,7 +52,7 @@ def create_recipe(request: WSGIRequest):
             # Задача на проверку орфографии.
             chain(
                 check_recipe_content.s(recipe.id),
-                send_email_task.signature((request.user.email, "Рецепт был проверен на ошибки"))
+                send_email_task.s(request.user.email, "Рецепт был проверен на ошибки")
             )()
 
             return HttpResponseRedirect("/")
