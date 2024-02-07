@@ -1,21 +1,21 @@
+from celery import chain
 from django.contrib.auth.decorators import login_required
+from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.handlers.wsgi import WSGIRequest
+from django.db.models import Case, When
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views import View
-from django.db.models import Case, When
-from django.contrib.postgres.aggregates import ArrayAgg
 
 from .cache import get_or_cache
 from .favorite_service import FavoriteRecipesService
 from .forms import RecipeForm
 from .models import Recipe
-from .tasks import home_page_task
+from .tasks import home_page_task, check_recipe_content, send_email_task
 
 
 def home(request: WSGIRequest):
-
     home_page_task.delay(str(request.user))  # Отправка в очередь этого задания.
 
     recipes_queryset = (
@@ -48,6 +48,12 @@ def create_recipe(request: WSGIRequest):
             recipe.user = request.user
             recipe.save()  # Сохраняем в базу объект.
             form.save_m2m()  # Сохраняем отношения many to many для ингредиентов и рецепта.
+
+            # Задача на проверку орфографии.
+            chain(
+                check_recipe_content.s(recipe.id),
+                send_email_task.s("Рецепт был проверен на ошибки", request.user.email)
+            )()
 
             return HttpResponseRedirect("/")
 

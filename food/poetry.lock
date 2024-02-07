@@ -706,6 +706,21 @@ yaml = ["PyYAML (>=3.10)"]
 zookeeper = ["kazoo (>=2.8.0)"]
 
 [[package]]
+name = "language-tool-python"
+version = "2.7.1"
+description = "Checks grammar using LanguageTool."
+optional = false
+python-versions = "*"
+files = [
+    {file = "language_tool_python-2.7.1-py3-none-any.whl", hash = "sha256:ea9e93c261fbc1ec8bd52353c1b22fadba597cd4d65153d7c8f86fe499c719e7"},
+    {file = "language_tool_python-2.7.1.tar.gz", hash = "sha256:753bb6d9a5a8c810bfa96b9029531cfc147fa84822b035e882ff4b3e7c686dae"},
+]
+
+[package.dependencies]
+requests = "*"
+tqdm = "*"
+
+[[package]]
 name = "oauthlib"
 version = "3.2.2"
 description = "A generic, spec-compliant, thorough implementation of the OAuth request-signing logic"
@@ -1169,6 +1184,26 @@ doc = ["sphinx"]
 test = ["pytest", "pytest-cov"]
 
 [[package]]
+name = "tqdm"
+version = "4.66.1"
+description = "Fast, Extensible Progress Meter"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "tqdm-4.66.1-py3-none-any.whl", hash = "sha256:d302b3c5b53d47bce91fea46679d9c3c6508cf6332229aa1e7d8653723793386"},
+    {file = "tqdm-4.66.1.tar.gz", hash = "sha256:d88e651f9db8d8551a62556d3cff9e3034274ca5d66e93197cf2490e2dcb69c7"},
+]
+
+[package.dependencies]
+colorama = {version = "*", markers = "platform_system == \"Windows\""}
+
+[package.extras]
+dev = ["pytest (>=6)", "pytest-cov", "pytest-timeout", "pytest-xdist"]
+notebook = ["ipywidgets (>=6)"]
+slack = ["slack-sdk"]
+telegram = ["requests"]
+
+[[package]]
 name = "typing-extensions"
 version = "4.9.0"
 description = "Backported and Experimental Type Hints for Python 3.8+"
@@ -1243,4 +1278,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "d66df35b4444b77e0ebf99a7880e3fe258b73c708874e212de7b443cecd42b6d"
+content-hash = "1ed89dd4058a19ccb7be41b144226c47c49ef0bafb6607ea1e35e6cbed6f3033"
