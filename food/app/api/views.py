@@ -1,3 +1,5 @@
+import uuid
+
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
@@ -64,19 +66,19 @@ class RecipeListCreateGenericAPIView(GenericAPIView):
             return RecipeCreateSerializer
         return RecipeListSerializer
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs) -> Response:
         """
         Метод `get` вызывается автоматический, когда HTTP метод запроса является `GET`.
         """
         queryset = self.get_queryset()
-        serializer: ModelSerializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs) -> Response:
         """
         Метод `post` вызывается автоматический, когда HTTP метод запроса является `POST`.
         """
-        serializer: ModelSerializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         recipe = serializer.save(user=self.request.user)
 
@@ -148,7 +150,7 @@ def detail_recipe_api_view(request, pk: int):
         "id": recipe.id,
         "name": recipe.name,
         "description": recipe.description,
-        "preview_image": recipe.preview_image.url,
+        "preview_image": recipe.preview_image,
         "created_at": recipe.created_at,
         "time_minutes": recipe.time_minutes,
         "user": recipe.user.id,
@@ -161,13 +163,14 @@ def detail_recipe_api_view(request, pk: int):
 class UploadImageAPIView(GenericAPIView):
     serializer_class = ImageSerializer
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs) -> Response:
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         image: InMemoryUploadedFile = serializer.validated_data["image"]
         image_folder_path = settings.MEDIA_ROOT / "images"
         image_folder_path.mkdir(parents=True, exist_ok=True)
 
-        with (image_folder_path / image.name).open("bw") as image_file:
+        image_name = image.name or f"{uuid.uuid4()}.png"
+        with (image_folder_path / image_name).open("bw") as image_file:
             image_file.write(image.read())
-        return Response({"name": image.name, "url": "images/" + image.name})
+        return Response({"name": image.name, "url": "images/" + image_name})

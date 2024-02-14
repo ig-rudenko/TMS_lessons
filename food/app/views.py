@@ -1,6 +1,9 @@
-from celery import chain
+from typing import cast
+
+from celery.canvas import chain
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.aggregates import ArrayAgg
+from django.contrib.auth import get_user_model
 from django.core.handlers.wsgi import WSGIRequest
 from django.db.models import Case, When
 from django.http import HttpResponseRedirect, HttpResponseForbidden
@@ -8,11 +11,12 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views import View
 
+from users.models import User
 from .cache import get_or_cache
 from .favorite_service import FavoriteRecipesService
 from .forms import RecipeForm
 from .models import Recipe
-from .tasks import home_page_task, check_recipe_content, send_email_task
+from .tasks import check_recipe_content, send_email_task
 
 
 def home(request: WSGIRequest):
@@ -30,7 +34,7 @@ def home(request: WSGIRequest):
     if search:
         recipes_data = recipes_queryset.filter(description__search=search)
     else:
-        recipes_data = get_or_cache("home-page-recipes", recipes_queryset)
+        recipes_data = get_or_cache("home-page-recipes", recipes_queryset)  # type: ignore
 
     return render(request, 'home.html', {"recipes": recipes_data})
 
@@ -43,15 +47,15 @@ def create_recipe(request: WSGIRequest):
         form = RecipeForm(request.POST, request.FILES)  # Файлы находятся отдельно!
         if form.is_valid():
             recipe: Recipe = form.save(commit=False)  # Не сохранять в базу рецепт, а вернуть его объект.
-            recipe.user = request.user
+            recipe.user = cast(User, request.user)
             recipe.save()  # Сохраняем в базу объект.
             form.save_m2m()  # Сохраняем отношения many to many для ингредиентов и рецепта.
 
             # Задача на проверку орфографии.
-            # chain(
-            #     check_recipe_content.s(recipe.id),
-            #     send_email_task.s(request.user.email, "Рецепт был проверен на ошибки")
-            # )()
+            chain(
+                check_recipe_content.s(recipe.id),
+                send_email_task.s(recipe.user.email, "Рецепт был проверен на ошибки")
+            )()
 
             return HttpResponseRedirect("/")
 
@@ -72,7 +76,7 @@ def update_recipe(request: WSGIRequest, recipe_id: int):
     if request.method == 'POST':
         form = RecipeForm(request.POST, request.FILES, instance=recipe)  # Файлы находятся отдельно!
         if form.is_valid():
-            recipe: Recipe = form.save()
+            recipe = form.save()
             return HttpResponseRedirect(reverse("show-recipe", args=(recipe.id,)))
 
     return render(request, 'recipe-form.html', {'form': form})
