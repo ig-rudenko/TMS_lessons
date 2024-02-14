@@ -1,7 +1,7 @@
 from django.core.cache import cache
 
 
-def get_or_cache(cache_key, queryset, timeout: int = 30):
+def get_or_cache(cache_key, queryset, timeout: int = 30) -> list:
     cached = cache.get(cache_key)
     if not cached:
         cached = list(queryset)

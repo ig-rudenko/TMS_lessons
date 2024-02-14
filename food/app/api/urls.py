@@ -4,7 +4,7 @@ from . import views
 
 # /api/recipes/
 
-app_name = 'recipes:api'
+app_name = 'recipes_api'
 
 urlpatterns = [
     # Классы представлений указываем через вызов метода `as_view`

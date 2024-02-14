@@ -53,6 +53,24 @@ Django = ">=3.2"
 django-js-asset = ">=2.0"
 
 [[package]]
+name = "django-ckeditor-5"
+version = "0.2.11"
+description = "CKEditor 5 for Django."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "django-ckeditor-5-0.2.11.tar.gz", hash = "sha256:dc1700f5ad023e3328d5194d08c29870f114468c8c8348b2cd7c608dec264342"},
+    {file = "django_ckeditor_5-0.2.11-py3-none-any.whl", hash = "sha256:85946b8a94cd7a203e65bdc7dd781304293cd608b2246f32ac96509afb569e86"},
+]
+
+[package.dependencies]
+Django = ">=2.2"
+Pillow = "*"
+
+[package.extras]
+dev = ["bandit[toml] (==1.7.6)", "black (==22.12.0)", "codespell (==2.2.2)", "coverage (==7.4.0)", "mypy (==1.8.0)", "mypy-extensions (==1.0.0)", "pytest (==7.4.4)", "pytest-cov (==4.0.0)", "pytest-django (==4.5.2)", "pytest-mock (==3.10.0)", "safety (==2.3.5)", "types-setuptools (==65.6.0.2)", "typing-extensions (==4.9.0)"]
+
+[[package]]
 name = "django-debug-toolbar"
 version = "4.2.0"
 description = "A configurable set of panels that display various debug information about the current request/response."
@@ -334,4 +352,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "6edc4805cd2d1f94edf4938b98325419858d232e4f0cc0ac80db898356ab3c0b"
+content-hash = "c88ea3194fd19f2ebd868bd7dced5d9a55fff21ef0500c4715d124ba8b6cb3b3"

@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-d%o#*9u874te1lr=fe94w323^!1qr%&_51%oepqp2$o7-p*c^2')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', '0') == "1"
+DEBUG = os.environ.get('DJANGO_DEBUG', '1') == "1"
 
 ALLOWED_HOSTS = ["*"]  # Разрешаем все IP.
 INTERNAL_IPS = ["127.0.0.1"]
@@ -80,7 +80,7 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 ROOT_URLCONF = 'food.urls'
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
-LOGIN_URL = "/account/login"
+LOGIN_URL = "/account/login/"
 
 TEMPLATES = [
     {
@@ -119,20 +119,21 @@ DATABASES = {
 
 
 REDIS_CACHE = os.environ.get("REDIS_CACHE_URL")
+KEY_PREFIX = "test_django_food_" if DEBUG else "django_food_"
 
 if REDIS_CACHE:
     CACHES = {
         "default": {
             "BACKEND": "django.core.cache.backends.redis.RedisCache",
             "LOCATION": REDIS_CACHE,
-            "KEY_PREFIX": "test_django_food_" if DEBUG else "django_food_",
+            "KEY_PREFIX": KEY_PREFIX,
         }
     }
 else:
     CACHES = {
         "default": {
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-            "KEY_PREFIX": "test_django_food_" if DEBUG else "django_food_",
+            "KEY_PREFIX": KEY_PREFIX,
             "OPTIONS": {
                 "MAX_ENTRIES": 10,
                 "CULL_FREQUENCY": 2,  # 1/2

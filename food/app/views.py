@@ -16,8 +16,6 @@ from .tasks import home_page_task, check_recipe_content, send_email_task
 
 
 def home(request: WSGIRequest):
-    home_page_task.delay(str(request.user))  # Отправка в очередь этого задания.
-
     recipes_queryset = (
         Recipe.objects.all()
         .prefetch_related("ingredients")
@@ -50,12 +48,15 @@ def create_recipe(request: WSGIRequest):
             form.save_m2m()  # Сохраняем отношения many to many для ингредиентов и рецепта.
 
             # Задача на проверку орфографии.
-            chain(
-                check_recipe_content.s(recipe.id),
-                send_email_task.s(request.user.email, "Рецепт был проверен на ошибки")
-            )()
+            # chain(
+            #     check_recipe_content.s(recipe.id),
+            #     send_email_task.s(request.user.email, "Рецепт был проверен на ошибки")
+            # )()
 
             return HttpResponseRedirect("/")
+
+        else:
+            print(form.errors)
 
     return render(request, 'recipe-form.html', {'form': form})
 
