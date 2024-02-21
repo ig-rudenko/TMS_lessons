@@ -5,6 +5,8 @@ import aiohttp_jinja2
 from async_app.database.base import Base
 from async_app.urls import routes
 from async_app.database.connector import db_conn
+from async_app.middleware.storage import session_storage_middleware
+from async_app.middleware.auth import auth_middleware
 
 
 async def init_db(app):
@@ -17,7 +19,12 @@ async def init_db(app):
 
 
 if __name__ == '__main__':
-    app = web.Application()
+    app = web.Application(
+        middlewares=[
+            session_storage_middleware,
+            auth_middleware
+        ]
+    )
     app.add_routes(routes)
 
     # При старте приложения будет выполнена корутина.
