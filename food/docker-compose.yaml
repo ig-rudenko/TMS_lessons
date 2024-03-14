@@ -1,0 +1,109 @@
+version: "3.11"
+
+services:
+
+  database:
+    image: postgres:16.2
+    environment:
+      POSTGRES_USER: food_user
+      POSTGRES_PASSWORD: food_password
+      POSTGRES_DB: food
+
+    volumes:
+      - "./pg_data:/var/lib/postgresql/data"
+
+  cache:
+    image: redis:7.2.4-alpine
+
+  backend-1:
+    image: food:0.1
+    build: .
+    command: ./run.sh
+    environment:
+      DJANGO_SUPERUSER_EMAIL: admin@example.com
+      DJANGO_SUPERUSER_USERNAME: admin
+      DJANGO_SUPERUSER_PASSWORD: password
+
+      DJANGO_SECRET_KEY: "908r12nuinxdu1y345ui3yx190245123yx450234x53y4"
+      DJANGO_DEBUG: "0"
+      DATABASE_NAME: "food"
+      DATABASE_USER: "food_user"
+      DATABASE_PASSWORD: "food_password"
+      DATABASE_HOST: "database"
+      REDIS_CACHE_URL: "redis://cache:6379"
+      EMAIL_HOST_USER: "ig.rudenko1@yandex.ru"
+      DEFAULT_FROM_EMAIL: "ig.rudenko1@yandex.ru"
+      EMAIL_HOST_PASSWORD: "123123123123"
+      CELERY_BROKER_URL: "amqp://rabbit_user:rabbit_password@broker:5672/food"
+      CELERY_RESULT_BACKEND: "redis://celery-backend:6379"
+    depends_on:
+      - database
+      - broker
+      - cache
+
+    volumes:
+      - "./static:/app/static"
+
+    ports:
+      - "80:8000"
+
+  celery-worker-1:
+    image: food:0.1
+    build: .
+    command: celery -A food worker -c 2 -l INFO -n celery_worker_1 -Q celery
+    environment:
+      DJANGO_SECRET_KEY: "908r12nuinxdu1y345ui3yx190245123yx450234x53y4"
+      DJANGO_DEBUG: "0"
+      DATABASE_NAME: "food"
+      DATABASE_USER: "food_user"
+      DATABASE_PASSWORD: "food_password"
+      DATABASE_HOST: "database"
+      REDIS_CACHE_URL: "redis://cache:6379"
+      EMAIL_HOST_USER: "ig.rudenko1@yandex.ru"
+      DEFAULT_FROM_EMAIL: "ig.rudenko1@yandex.ru"
+      EMAIL_HOST_PASSWORD: "123123123123"
+      CELERY_BROKER_URL: "amqp://rabbit_user:rabbit_password@broker:5672/food"
+      CELERY_RESULT_BACKEND: "redis://celery-backend:6379"
+    depends_on:
+      - database
+      - broker
+      - cache
+      - celery-backend
+
+  celery-flower:
+    image: food:0.1
+    build: .
+    command: celery -A food flower --port=5555
+    environment:
+      DJANGO_SECRET_KEY: "908r12nuinxdu1y345ui3yx190245123yx450234x53y4"
+      DJANGO_DEBUG: "0"
+      DATABASE_NAME: "food"
+      DATABASE_USER: "food_user"
+      DATABASE_PASSWORD: "food_password"
+      DATABASE_HOST: "database"
+      REDIS_CACHE_URL: "redis://cache:6379"
+      EMAIL_HOST_USER: "ig.rudenko1@yandex.ru"
+      DEFAULT_FROM_EMAIL: "ig.rudenko1@yandex.ru"
+      EMAIL_HOST_PASSWORD: "123123123123"
+      CELERY_BROKER_URL: "amqp://rabbit_user:rabbit_password@broker:5672/food"
+      CELERY_RESULT_BACKEND: "redis://celery-backend:6379"
+    ports:
+      - "5555:5555"
+    depends_on:
+      - broker
+      - celery-backend
+
+  celery-backend:
+    image: redis:7.2.4-alpine
+
+  broker:
+    image: rabbitmq:3.13.0-management
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbit_user
+      RABBITMQ_DEFAULT_PASS: rabbit_password
+      RABBITMQ_DEFAULT_VHOST: food
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: -rabbit log_levels [{connection,error},{default,error}] disk_free_limit 2147483648
+
+    ports:
+      - "15672:15672"
+

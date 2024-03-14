@@ -1,0 +1,9 @@
+*
+!app
+!food
+!templates
+!users
+!manage.py
+!pyproject.toml
+!poetry.lock
+!run.sh

@@ -2,10 +2,8 @@ from typing import cast
 
 from celery.canvas import chain
 from django.contrib.auth.decorators import login_required
-from django.contrib.postgres.aggregates import ArrayAgg
-from django.contrib.auth import get_user_model
 from django.core.handlers.wsgi import WSGIRequest
-from django.db.models import Case, When
+from django.db.models import Case, When, Value, Subquery, OuterRef, Func
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
@@ -15,17 +13,27 @@ from users.models import User
 from .cache import get_or_cache
 from .favorite_service import FavoriteRecipesService
 from .forms import RecipeForm
-from .models import Recipe
+from .models import Recipe, Ingredient
 from .tasks import check_recipe_content, send_email_task
+
+
+class GroupConcat(Func):
+    function = 'STRING_AGG'
+    template = '%(function)s(%(expressions)s)'
 
 
 def home(request: WSGIRequest):
     recipes_queryset = (
-        Recipe.objects.all()
-        .prefetch_related("ingredients")
-        .annotate(
-            # Создание массива уникальных имен тегов для каждой заметки
-            ingredients_list=ArrayAgg('ingredients__name', distinct=True)
+        Recipe.objects.annotate(
+            ingredients_list=Subquery(
+                Ingredient.objects
+                .filter(recipe=OuterRef('pk'))
+                .values('recipe')
+                .annotate(
+                    names=GroupConcat('name', Value(" "), distinct=True)
+                )
+                .values('names')[:1]
+            )
         )
         .values("id", "name", "time_minutes", "preview_image", "ingredients_list", "category")
     )

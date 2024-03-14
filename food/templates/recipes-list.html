@@ -19,7 +19,7 @@
                     <span>{{ r.time_minutes }} мин.</span>
                 </div>
                 <div class="pb-3">
-                  {% for ingredient in r.ingredients_list %}
+                  {% for ingredient in r.ingredients_list.split %}
                   	<span class="badge text-bg-info">{{ ingredient }}</span>
                   {% endfor %}
                 </div>

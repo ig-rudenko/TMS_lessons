@@ -1,5 +1,3 @@
-import asyncio
-
 from aiohttp import web
 from aiohttp_jinja2 import template
 from sqlalchemy.exc import NoResultFound
@@ -28,7 +26,7 @@ class NoteCreateView(web.View):
         user_data = await self.request.post()
         title = user_data.get('title')
         content = user_data.get('content')
-        post = await Post.create(title=title, content=content)
+        post = await Post.create(title=title, content=content, user_id=self.request.user)
         print(post)
 
         raise web.HTTPFound("/")
