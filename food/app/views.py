@@ -3,6 +3,7 @@ from typing import cast
 from celery.canvas import chain
 from django.contrib.auth.decorators import login_required
 from django.core.handlers.wsgi import WSGIRequest
+from django.core.cache import cache
 from django.db.models import Case, When, Value, Subquery, OuterRef, Func
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
@@ -64,6 +65,7 @@ def create_recipe(request: WSGIRequest):
                 check_recipe_content.s(recipe.id),
                 send_email_task.s(recipe.user.email, "Рецепт был проверен на ошибки")
             )()
+            cache.delete("home-page-recipes")
 
             return HttpResponseRedirect("/")
 
@@ -88,6 +90,16 @@ def update_recipe(request: WSGIRequest, recipe_id: int):
             return HttpResponseRedirect(reverse("show-recipe", args=(recipe.id,)))
 
     return render(request, 'recipe-form.html', {'form': form})
+
+
+@login_required
+def delete_recipe(request: WSGIRequest, recipe_id: int):
+    recipe = get_object_or_404(Recipe, id=recipe_id)
+    if recipe.user != request.user:
+        return HttpResponseForbidden("You do not have permission to delete this recipe")
+    recipe.delete()
+    cache.delete("home-page-recipes")
+    return HttpResponseRedirect(reverse("home"))
 
 
 def show_recipe(request: WSGIRequest, recipe_id: int):

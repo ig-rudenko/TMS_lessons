@@ -1,3 +1,4 @@
+{% load media_storages %}
 <div class="row row-cols-1 row-cols-md-3 g-4">
 
     {% for r in recipes %}
@@ -7,7 +8,7 @@
                 <div style="position:absolute;top:10px;left:20px">
                     {% include 'recipe/category.html' with category=r.category %}
                 </div>
-                <img class="rounded-2 m-2" style="max-height: 230px; max-width: 100%;" src="/media/{{ r.preview_image }}" >
+                <img class="rounded-2 m-2" style="max-height: 230px; max-width: 100%;" src="{{ r.preview_image|get_storage_url }}" >
             </div>
             <div class="card-body">
                 <div class="d-flex align-items-center py-2">

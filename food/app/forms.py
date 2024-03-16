@@ -1,4 +1,5 @@
 from django import forms
+from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.conf import settings
 from ckeditor.fields import CKEditorWidget
@@ -19,10 +20,8 @@ class RecipeForm(forms.ModelForm):
     def save(self, commit=True):
         image: InMemoryUploadedFile = self.cleaned_data["preview_image"]
 
-        image_folder_path = settings.MEDIA_ROOT / "images"
-        image_folder_path.mkdir(parents=True, exist_ok=True)
-
-        with (image_folder_path / image.name).open("bw") as image_file:
-            image_file.write(image.read())
         self.instance.preview_image = f"images/{image.name}"
+
+        with default_storage.open(self.instance.preview_image, "wb") as image_file:
+            image_file.write(image.read())
         return super().save(commit)

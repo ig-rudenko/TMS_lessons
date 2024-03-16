@@ -4,12 +4,11 @@ from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.decorators import api_view
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
-from rest_framework.serializers import ModelSerializer
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from django.core.files.storage import default_storage
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.conf import settings
 
 from app.models import Recipe
 from .permissions import IsOwnerOrReadOnly
@@ -167,10 +166,9 @@ class UploadImageAPIView(GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         image: InMemoryUploadedFile = serializer.validated_data["image"]
-        image_folder_path = settings.MEDIA_ROOT / "images"
-        image_folder_path.mkdir(parents=True, exist_ok=True)
 
         image_name = image.name or f"{uuid.uuid4()}.png"
-        with (image_folder_path / image_name).open("bw") as image_file:
+        with default_storage.open("images/" + image_name, "wb") as image_file:
             image_file.write(image.read())
-        return Response({"name": image.name, "url": "images/" + image_name})
+
+        return Response({"name": image.name, "url": default_storage.url("images/" + image_name)})

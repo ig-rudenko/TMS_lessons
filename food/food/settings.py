@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
+import json
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "drf_yasg",
     "django_celery_beat",
+    'django_prometheus'
 ]
 
 if DEBUG:
@@ -59,6 +61,7 @@ if DEBUG:
     ]
 
 MIDDLEWARE = [
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'django.middleware.security.SecurityMiddleware',
     "django.middleware.gzip.GZipMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -67,6 +70,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
 if DEBUG:
@@ -94,6 +98,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 "app.favorite_service.favorite_service_preprocessor",
+                # "app.templatetags.media_storages",
             ],
         },
     },
@@ -108,7 +113,7 @@ AUTH_USER_MODEL = "users.User"
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django_prometheus.db.backends.postgresql',
         'NAME': os.environ.get("DATABASE_NAME"),
         "USER": os.environ.get("DATABASE_USER"),
         "PASSWORD": os.environ.get("DATABASE_PASSWORD"),
@@ -124,7 +129,7 @@ KEY_PREFIX = "test_django_food_" if DEBUG else "django_food_"
 if REDIS_CACHE:
     CACHES = {
         "default": {
-            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "BACKEND": "django_prometheus.cache.backends.redis.RedisCache",
             "LOCATION": REDIS_CACHE,
             "KEY_PREFIX": KEY_PREFIX,
         }
@@ -132,7 +137,7 @@ if REDIS_CACHE:
 else:
     CACHES = {
         "default": {
-            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "BACKEND": "django_prometheus.cache.backends.locmem.LocMemCache",
             "KEY_PREFIX": KEY_PREFIX,
             "OPTIONS": {
                 "MAX_ENTRIES": 10,
@@ -202,7 +207,7 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', "")
 STATIC_URL = 'static/'
 
 if os.environ.get("COLLECT_STATIC"):
-    STATIC_ROOT = "/var/www/django-food/static/"
+    STATIC_ROOT = BASE_DIR / 'static'
 
 else:
     STATICFILES_DIRS = [
@@ -210,8 +215,27 @@ else:
     ]
 
 # ===================== MEDIA =========================
-MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# MEDIA_URL = "media/"
+# MEDIA_ROOT = BASE_DIR / "media"
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            "endpoint_url": os.environ.get('MINIO_ENDPOINT_URL'),
+            "access_key": os.environ.get('MINIO_ROOT_USER'),
+            "secret_key": os.environ.get("MINIO_ROOT_PASSWORD"),
+            "bucket_name": os.environ.get('MINIO_BUCKET_NAME'),
+            "default_acl": "public-read",
+            "url_protocol": "http:",
+            "gzip": True,
+            "file_overwrite": False,
+        }
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

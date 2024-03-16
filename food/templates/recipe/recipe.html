@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load media_storages %}
 
 {% block title %}{{ recipe.name }}{% endblock %}
 
@@ -6,13 +7,13 @@
 <div class="container">
     <div class=" row flex-lg-row-reverse align-items-center g-5 py-5">
       <div class="col-10 col-sm-8 col-lg-6">
-        <img src="/media/{{ recipe.preview_image }}" class="d-block mx-lg-auto img-fluid rounded-3" style="max-height: 300px; max-width: 500px" alt="Bootstrap Themes" loading="lazy">
+        <img src="{{ recipe.preview_image|get_storage_url }}" class="d-block mx-lg-auto img-fluid rounded-3" style="max-height: 300px; max-width: 500px" alt="Bootstrap Themes" loading="lazy">
       </div>
       <div class="col-lg-6">
         <h1 class="display-5 fw-bold text-body-emphasis lh-1 mb-3">{{ recipe.name }}</h1>
       
-        <div class="pb-2">
-            <form method="post" action="{% url 'make-favorite-recipe' recipe.id %}">
+        <div class="pb-2 d-flex">
+            <form method="post" action="{% url 'make-favorite-recipe' recipe.id %}" class="me-2">
                 {% csrf_token %}
                 {% if recipe.id in favorites_ids %}
                     <input hidden name="favorite" type="text" value="no">
@@ -22,6 +23,16 @@
                     <button type="submit" class="btn btn-primary">В избранное</button>
                 {% endif %}
             </form>
+
+            {% if request.user == recipe.user %}
+                <a href="{% url 'update-recipe' recipe.pk %}" class="me-2 btn btn-success">Редактировать</a>
+                
+                <form method="post" action="{% url 'delete-recipe' recipe.pk %}" class="me-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            {% endif %}
+        
         </div>
 
         <h5 class="">Время приготовления: {{ recipe.time_minutes }} мин.</h5>

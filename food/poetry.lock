@@ -54,6 +54,44 @@ files = [
 ]
 
 [[package]]
+name = "boto3"
+version = "1.34.64"
+description = "The AWS SDK for Python"
+optional = false
+python-versions = ">= 3.8"
+files = [
+    {file = "boto3-1.34.64-py3-none-any.whl", hash = "sha256:8c6fbd3d45399a4e4685010117fb2dc52fc6afdab5a9460957d463ae0c2cc55d"},
+    {file = "boto3-1.34.64.tar.gz", hash = "sha256:e5d681f443645e6953ed0727bf756bf16d85efefcb69cf051d04a070ce65e545"},
+]
+
+[package.dependencies]
+botocore = ">=1.34.64,<1.35.0"
+jmespath = ">=0.7.1,<2.0.0"
+s3transfer = ">=0.10.0,<0.11.0"
+
+[package.extras]
+crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
+
+[[package]]
+name = "botocore"
+version = "1.34.64"
+description = "Low-level, data-driven core of boto 3."
+optional = false
+python-versions = ">= 3.8"
+files = [
+    {file = "botocore-1.34.64-py3-none-any.whl", hash = "sha256:0ab760908749fe82325698591c49755a5bb20307d85a419aca9cc74e783b9407"},
+    {file = "botocore-1.34.64.tar.gz", hash = "sha256:084f8c45216d62dc1add2350e236a2d5283526aacd0681e9818b37a6a5e5438b"},
+]
+
+[package.dependencies]
+jmespath = ">=0.7.1,<2.0.0"
+python-dateutil = ">=2.1,<3.0.0"
+urllib3 = {version = ">=1.25.4,<2.2.0 || >2.2.0,<3", markers = "python_version >= \"3.10\""}
+
+[package.extras]
+crt = ["awscrt (==0.19.19)"]
+
+[[package]]
 name = "celery"
 version = "5.3.6"
 description = "Distributed Task Queue."
@@ -587,6 +625,61 @@ django = ">=3.2"
 tests = ["coverage"]
 
 [[package]]
+name = "django-prometheus"
+version = "2.3.1"
+description = "Django middlewares to monitor your application with Prometheus.io."
+optional = false
+python-versions = "*"
+files = [
+    {file = "django-prometheus-2.3.1.tar.gz", hash = "sha256:f9c8b6c780c9419ea01043c63a437d79db2c33353451347894408184ad9c3e1e"},
+    {file = "django_prometheus-2.3.1-py2.py3-none-any.whl", hash = "sha256:cf9b26f7ba2e4568f08f8f91480a2882023f5908579681bcf06a4d2465f12168"},
+]
+
+[package.dependencies]
+prometheus-client = ">=0.7"
+
+[[package]]
+name = "django-redis"
+version = "5.4.0"
+description = "Full featured redis cache backend for Django."
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "django-redis-5.4.0.tar.gz", hash = "sha256:6a02abaa34b0fea8bf9b707d2c363ab6adc7409950b2db93602e6cb292818c42"},
+    {file = "django_redis-5.4.0-py3-none-any.whl", hash = "sha256:ebc88df7da810732e2af9987f7f426c96204bf89319df4c6da6ca9a2942edd5b"},
+]
+
+[package.dependencies]
+Django = ">=3.2"
+redis = ">=3,<4.0.0 || >4.0.0,<4.0.1 || >4.0.1"
+
+[package.extras]
+hiredis = ["redis[hiredis] (>=3,!=4.0.0,!=4.0.1)"]
+
+[[package]]
+name = "django-storages"
+version = "1.14.2"
+description = "Support for many storage backends in Django"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "django-storages-1.14.2.tar.gz", hash = "sha256:51b36af28cc5813b98d5f3dfe7459af638d84428c8df4a03990c7d74d1bea4e5"},
+    {file = "django_storages-1.14.2-py3-none-any.whl", hash = "sha256:1db759346b52ada6c2efd9f23d8241ecf518813eb31db9e2589207174f58f6ad"},
+]
+
+[package.dependencies]
+Django = ">=3.2"
+
+[package.extras]
+azure = ["azure-core (>=1.13)", "azure-storage-blob (>=12)"]
+boto3 = ["boto3 (>=1.4.4)"]
+dropbox = ["dropbox (>=7.2.1)"]
+google = ["google-cloud-storage (>=1.27)"]
+libcloud = ["apache-libcloud"]
+s3 = ["boto3 (>=1.4.4)"]
+sftp = ["paramiko (>=1.15)"]
+
+[[package]]
 name = "django-stubs"
 version = "4.2.7"
 description = "Mypy stubs for Django"
@@ -839,6 +932,17 @@ python-versions = ">=3.5"
 files = [
     {file = "inflection-0.5.1-py2.py3-none-any.whl", hash = "sha256:f38b2b640938a4f35ade69ac3d053042959b62a0f1076a5bbaa1b9526605a8a2"},
     {file = "inflection-0.5.1.tar.gz", hash = "sha256:1a29730d366e996aaacffb2f1f1cb9593dc38e2ddd30c91250c6dde09ea9b417"},
+]
+
+[[package]]
+name = "jmespath"
+version = "1.0.1"
+description = "JSON Matching Expressions"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "jmespath-1.0.1-py3-none-any.whl", hash = "sha256:02e2e4cc71b5bcab88332eebf907519190dd9e6e82107fa7f83b1003a6252980"},
+    {file = "jmespath-1.0.1.tar.gz", hash = "sha256:90261b206d6defd58fdd5e85f478bf633a2901798906be2ad389150c5c60edbe"},
 ]
 
 [[package]]
@@ -1374,6 +1478,23 @@ requests = ">=2.0.0"
 rsa = ["oauthlib[signedtoken] (>=3.0.0)"]
 
 [[package]]
+name = "s3transfer"
+version = "0.10.1"
+description = "An Amazon S3 Transfer Manager"
+optional = false
+python-versions = ">= 3.8"
+files = [
+    {file = "s3transfer-0.10.1-py3-none-any.whl", hash = "sha256:ceb252b11bcf87080fb7850a224fb6e05c8a776bab8f2b64b7f25b969464839d"},
+    {file = "s3transfer-0.10.1.tar.gz", hash = "sha256:5683916b4c724f799e600f41dd9e10a9ff19871bf87623cc8f491cb4f5fa0a19"},
+]
+
+[package.dependencies]
+botocore = ">=1.33.2,<2.0a.0"
+
+[package.extras]
+crt = ["botocore[crt] (>=1.33.2,<2.0a.0)"]
+
+[[package]]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -1574,13 +1695,13 @@ files = [
 
 [[package]]
 name = "urllib3"
-version = "2.2.0"
+version = "2.2.1"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "urllib3-2.2.0-py3-none-any.whl", hash = "sha256:ce3711610ddce217e6d113a2732fafad960a03fd0318c91faa79481e35c11224"},
-    {file = "urllib3-2.2.0.tar.gz", hash = "sha256:051d961ad0c62a94e50ecf1af379c3aba230c66c710493493560c0c223c49f20"},
+    {file = "urllib3-2.2.1-py3-none-any.whl", hash = "sha256:450b20ec296a467077128bff42b73080516e71b56ff59a60a02bef2232c4fa9d"},
+    {file = "urllib3-2.2.1.tar.gz", hash = "sha256:d0570876c61ab9e520d776c38acbbb5b05a776d3f9ff98a5c8fd5162a444cf19"},
 ]
 
 [package.extras]
@@ -1614,4 +1735,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "be16f4a694d6a91ec36116e3ea818744e8bf0544b4e2a8ce3995058d42befbc6"
+content-hash = "ccfd570330eaa0db94223d0851efd25fa0e6b07c60c5c8a38915d3170f2b54bb"

@@ -14,3 +14,7 @@
     EMAIL_HOST_USER
     DEFAULT_FROM_EMAIL
     EMAIL_HOST_PASSWORD
+
+### Структура docker-compose
+
+![img.png](img/img.png)

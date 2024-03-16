@@ -2,68 +2,93 @@ version: "3.11"
 
 services:
 
+  http-balancer:
+    image: nginx:1.25.4-alpine
+    ports:
+    - "80:80"
+    volumes:
+    - "./static:/var/www/static"
+    - "./compose/nginx/default.conf:/etc/nginx/conf.d/default.conf"
+    depends_on:
+      - backend-1
+
   database:
     image: postgres:16.2
+    restart: always
     environment:
       POSTGRES_USER: food_user
       POSTGRES_PASSWORD: food_password
       POSTGRES_DB: food
 
     volumes:
-      - "./pg_data:/var/lib/postgresql/data"
+      - "./compose/pg_data:/var/lib/postgresql/data"
+
+  pgadmin4:
+    image: elestio/pgadmin:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@mail.com
+      PGADMIN_DEFAULT_PASSWORD: admin_password
+      PGADMIN_LISTEN_PORT: 8080
+    ports:
+    - "8080:8080"
 
   cache:
+    restart: always
     image: redis:7.2.4-alpine
 
   backend-1:
     image: food:0.1
+    restart: always
     build: .
     command: ./run.sh
     environment:
       DJANGO_SUPERUSER_EMAIL: admin@example.com
       DJANGO_SUPERUSER_USERNAME: admin
       DJANGO_SUPERUSER_PASSWORD: password
-
-      DJANGO_SECRET_KEY: "908r12nuinxdu1y345ui3yx190245123yx450234x53y4"
-      DJANGO_DEBUG: "0"
-      DATABASE_NAME: "food"
-      DATABASE_USER: "food_user"
-      DATABASE_PASSWORD: "food_password"
-      DATABASE_HOST: "database"
-      REDIS_CACHE_URL: "redis://cache:6379"
-      EMAIL_HOST_USER: "ig.rudenko1@yandex.ru"
-      DEFAULT_FROM_EMAIL: "ig.rudenko1@yandex.ru"
-      EMAIL_HOST_PASSWORD: "123123123123"
-      CELERY_BROKER_URL: "amqp://rabbit_user:rabbit_password@broker:5672/food"
-      CELERY_RESULT_BACKEND: "redis://celery-backend:6379"
+      MINIO_ROOT_USER: "myminioadmin"
+      MINIO_ROOT_PASSWORD: "jdh2eh1h2e0h19hed9812h9ed8uh189uh3"
+      MINIO_BUCKET_NAME: "food"
+      MINIO_ENDPOINT_URL: "http://minio-balancer:9000"
+      MINIO_CUSTOM_URL: "http://localhost:9000"
+    env_file:
+      - compose/.compose.env
     depends_on:
       - database
       - broker
       - cache
-
+      - minio-balancer
     volumes:
       - "./static:/app/static"
 
+  minio:
+    image: minio/minio
+    restart: always
+    container_name: minio
+    environment:
+      MINIO_ROOT_USER: "myminioadmin"
+      MINIO_ROOT_PASSWORD: "jdh2eh1h2e0h19hed9812h9ed8uh189uh3"
+    volumes:
+      - ./compose/minio_data:/data  # Место для хранения данных MinIO
+    command: server /data --address 0.0.0.0:9000 --console-address 0.0.0.0:9001
+
+  minio-balancer:
+    image: nginx:1.25.4-alpine
+    volumes:
+      - "./compose/nginx/minio.conf:/etc/nginx/conf.d/default.conf"
     ports:
-      - "80:8000"
+      - "9000:9000"
+      - "9001:9001"
+    depends_on:
+      - minio
 
   celery-worker-1:
     image: food:0.1
     build: .
+    restart: always
     command: celery -A food worker -c 2 -l INFO -n celery_worker_1 -Q celery
-    environment:
-      DJANGO_SECRET_KEY: "908r12nuinxdu1y345ui3yx190245123yx450234x53y4"
-      DJANGO_DEBUG: "0"
-      DATABASE_NAME: "food"
-      DATABASE_USER: "food_user"
-      DATABASE_PASSWORD: "food_password"
-      DATABASE_HOST: "database"
-      REDIS_CACHE_URL: "redis://cache:6379"
-      EMAIL_HOST_USER: "ig.rudenko1@yandex.ru"
-      DEFAULT_FROM_EMAIL: "ig.rudenko1@yandex.ru"
-      EMAIL_HOST_PASSWORD: "123123123123"
-      CELERY_BROKER_URL: "amqp://rabbit_user:rabbit_password@broker:5672/food"
-      CELERY_RESULT_BACKEND: "redis://celery-backend:6379"
+    env_file:
+      - compose/.compose.env
     depends_on:
       - database
       - broker
@@ -73,20 +98,10 @@ services:
   celery-flower:
     image: food:0.1
     build: .
+    restart: always
     command: celery -A food flower --port=5555
-    environment:
-      DJANGO_SECRET_KEY: "908r12nuinxdu1y345ui3yx190245123yx450234x53y4"
-      DJANGO_DEBUG: "0"
-      DATABASE_NAME: "food"
-      DATABASE_USER: "food_user"
-      DATABASE_PASSWORD: "food_password"
-      DATABASE_HOST: "database"
-      REDIS_CACHE_URL: "redis://cache:6379"
-      EMAIL_HOST_USER: "ig.rudenko1@yandex.ru"
-      DEFAULT_FROM_EMAIL: "ig.rudenko1@yandex.ru"
-      EMAIL_HOST_PASSWORD: "123123123123"
-      CELERY_BROKER_URL: "amqp://rabbit_user:rabbit_password@broker:5672/food"
-      CELERY_RESULT_BACKEND: "redis://celery-backend:6379"
+    env_file:
+      - compose/.compose.env
     ports:
       - "5555:5555"
     depends_on:
@@ -94,10 +109,12 @@ services:
       - celery-backend
 
   celery-backend:
+    restart: always
     image: redis:7.2.4-alpine
 
   broker:
     image: rabbitmq:3.13.0-management
+    restart: always
     environment:
       RABBITMQ_DEFAULT_USER: rabbit_user
       RABBITMQ_DEFAULT_PASS: rabbit_password
@@ -107,3 +124,31 @@ services:
     ports:
       - "15672:15672"
 
+  influxdb:
+    image: influxdb:1.8-alpine
+    restart: always
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    volumes:
+      - ./compose/influxdb:/var/lib/influxdb
+
+  prometheus:
+    image: prom/prometheus
+    restart: always
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./compose/prometheus.yaml:/etc/prometheus/prometheus.yaml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+
+  grafana:
+    image: grafana/grafana
+    restart: always
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./compose/grafana_data:/var/lib/grafana
