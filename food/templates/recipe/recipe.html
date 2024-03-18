@@ -17,20 +17,29 @@
                 {% csrf_token %}
                 {% if recipe.id in favorites_ids %}
                     <input hidden name="favorite" type="text" value="no">
-                    <button type="submit" class="btn btn-warning">Убрать из избранного</button>
+                    <button type="submit" class="btn btn-warning">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heartbreak-fill" viewBox="0 0 16 16">
+                          <path d="M8.931.586 7 3l1.5 4-2 3L8 15C22.534 5.396 13.757-2.21 8.931.586M7.358.77 5.5 3 7 7l-1.5 3 1.815 4.537C-6.533 4.96 2.685-2.467 7.358.77"></path>
+                        </svg>
+                        Убрать из избранного
+                    </button>
                 {% else %}
                     <input hidden name="favorite" type="text" value="yes">
-                    <button type="submit" class="btn btn-primary">В избранное</button>
+                    <button type="submit" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
+                          <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"></path>
+                        </svg>
+                        В избранное
+                    </button>
                 {% endif %}
             </form>
 
             {% if request.user == recipe.user %}
                 <a href="{% url 'update-recipe' recipe.pk %}" class="me-2 btn btn-success">Редактировать</a>
-                
-                <form method="post" action="{% url 'delete-recipe' recipe.pk %}" class="me-2">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Удалить</button>
-                </form>
+
+
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">Удалить</button>
+
             {% endif %}
         
         </div>
@@ -56,5 +65,27 @@
         {{ recipe.description | safe }}
     </div>
 
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="deleteModalLabel">Удаление рецепта</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Вы уверены, что хотите удалить рецепт "{{ recipe.name }}"
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        <form method="post" action="{% url 'delete-recipe' recipe.pk %}" class="me-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Удалить</button>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

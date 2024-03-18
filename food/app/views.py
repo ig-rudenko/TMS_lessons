@@ -69,10 +69,7 @@ def create_recipe(request: WSGIRequest):
 
             return HttpResponseRedirect("/")
 
-        else:
-            print(form.errors)
-
-    return render(request, 'recipe-form.html', {'form': form})
+    return render(request, 'recipe/create-form.html', {'form': form})
 
 
 @login_required
@@ -89,7 +86,7 @@ def update_recipe(request: WSGIRequest, recipe_id: int):
             recipe = form.save()
             return HttpResponseRedirect(reverse("show-recipe", args=(recipe.id,)))
 
-    return render(request, 'recipe-form.html', {'form': form})
+    return render(request, 'recipe/update-form.html', {'form': form, "recipe": recipe})
 
 
 @login_required
@@ -116,7 +113,11 @@ class ListFavoriteRecipesView(View):
         ids = favorite_service.favorites_ids[::-1]
         ordering = Case(*[When(id=ident, then=pos) for pos, ident in enumerate(ids)])
         queryset = Recipe.objects.filter(id__in=ids).order_by(ordering)
-        return render(request, "home.html", {"recipes": queryset})
+
+        search = request.GET.get("search")
+        if search:
+            queryset = queryset.filter(description__search=search)
+        return render(request, "recipe/favorite.html", {"recipes": queryset})
 
 
 class MakeFavoriteView(View):

@@ -34,18 +34,35 @@
       {% endif %}
 
 {#      Создать рецепт   #}
-        <li class="nav-item">
+        <li class="nav-item me-3">
           <a class="nav-link" href="{% url 'create-recipe' %}">Создать</a>
         </li>
 
       {% if user.is_authenticated %}
 
 {#      Выход   #}
-        <li class="nav-item">
-            <form action="{% url 'logout' %}" method="post">
-                {% csrf_token %}
-                <button class="nav-link" type="submit">Выйти</button>
-            </form>
+
+        <li class="p-1 dropdown">
+          <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="http://localhost/avatar?username={{ request.user.username }}" alt="mdo" width="32" height="32" class="rounded-circle">
+          </a>
+          <ul class="dropdown-menu text-small">
+            <li class="align-items-center d-flex px-2">
+                <img src="http://localhost/avatar?username={{ request.user.username }}" alt="mdo" width="64" height="64" class="rounded-circle me-2">
+                <span>{{ request.user.username }}</span>
+            </li>
+            <li>
+                <form action="{% url 'logout' %}" method="post" class="dropdown-item">
+                    {% csrf_token %}
+                    <button class="nav-link" type="submit">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="me-2" viewBox="0 0 16 16">
+                          <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"></path>
+                          <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"></path>
+                        </svg>Выйти
+                    </button>
+                </form>
+            </li>
+          </ul>
         </li>
 
       {% else %}
@@ -67,7 +84,7 @@
 
 
 {#    Форма поиска (по умолчанию метод GET)   #}
-      <form class="d-flex" action="{#  #}">
+      <form class="d-flex">
         <input name="search" value="{{ request.GET.search }}"
                style="width: 400px" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
         <button class="btn btn-outline-success" type="submit">Search</button>

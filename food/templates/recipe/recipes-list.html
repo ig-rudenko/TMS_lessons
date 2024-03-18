@@ -4,13 +4,19 @@
     {% for r in recipes %}
       <div class="col">
         <div class="card shadow-sm">
-            <div class="d-flex justify-content-center">
-                <div style="position:absolute;top:10px;left:20px">
-                    {% include 'recipe/category.html' with category=r.category %}
-                </div>
-                <img class="rounded-2 m-2" style="max-height: 230px; max-width: 100%;" src="{{ r.preview_image|get_storage_url }}" >
-            </div>
             <div class="card-body">
+                <a href="{% url 'show-recipe' r.id %}" class="text-decoration-none" >
+                    <h4 class="mx-4 card-text text-dark">{{ r.name }}</h4>
+                    <div style="position: relative">
+                        <div class="d-flex justify-content-center">
+                            <div style="position:absolute;top:10px;left:20px">
+                                {% include 'recipe/category.html' with category=r.category %}
+                            </div>
+                            <img class="rounded-2 m-2" style="max-height: 230px; max-width: 100%;" src="{{ r.preview_image|get_storage_url }}" >
+                        </div>
+                    </div>
+                </a>
+
                 <div class="d-flex align-items-center py-2">
                     <span>Время приготовления: </span>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="mx-2" viewBox="0 0 16 16">
@@ -24,15 +30,7 @@
                   	<span class="badge text-bg-info">{{ ingredient }}</span>
                   {% endfor %}
                 </div>
-              <p class="card-text">{{ r.name }}</p>
 
-              <div class="d-flex justify-content-between align-items-center">
-                <div class="btn-group">
-                  <a href="{% url 'show-recipe' r.id %}" type="button" class="btn btn-sm btn-outline-secondary">View</a>
-                  <a href="{% url 'update-recipe' r.id %}" type="button" class="btn btn-sm btn-outline-secondary">Edit</a>
-                </div>
-
-              </div>
             </div>
           </div>
       </div>
