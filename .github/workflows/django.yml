@@ -59,4 +59,5 @@ jobs:
     - name: Run Tests
       run: |
         cd food
+        mkdir media
         python manage.py test
