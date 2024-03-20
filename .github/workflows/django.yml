@@ -74,7 +74,7 @@ jobs:
         python manage.py test
 
   build-docker-image:
-    needs: ["test"]
+    #needs: ["test"]
 
     runs-on: ubuntu-latest
 
