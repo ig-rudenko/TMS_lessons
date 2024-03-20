@@ -14,5 +14,3 @@ RUN poetry config virtualenvs.create false && \
 
 COPY . .
 RUN chmod +x run.sh
-
-#ENTRYPOINT ["poetry", "run"]

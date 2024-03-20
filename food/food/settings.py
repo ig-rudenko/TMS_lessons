@@ -216,26 +216,28 @@ else:
 
 # ===================== MEDIA =========================
 # MEDIA_URL = "media/"
-# MEDIA_ROOT = BASE_DIR / "media"
 
-STORAGES = {
-    "default": {
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-        "OPTIONS": {
-            "endpoint_url": os.environ.get('MINIO_ENDPOINT_URL'),
-            "access_key": os.environ.get('MINIO_ROOT_USER'),
-            "secret_key": os.environ.get("MINIO_ROOT_PASSWORD"),
-            "bucket_name": os.environ.get('MINIO_BUCKET_NAME'),
-            "default_acl": "public-read",
-            "url_protocol": "http:",
-            "gzip": True,
-            "file_overwrite": False,
-        }
-    },
-    "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-    },
-}
+if DEBUG:
+    MEDIA_ROOT = BASE_DIR / "media"
+else:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "endpoint_url": os.environ.get('MINIO_ENDPOINT_URL'),
+                "access_key": os.environ.get('MINIO_ROOT_USER'),
+                "secret_key": os.environ.get("MINIO_ROOT_PASSWORD"),
+                "bucket_name": os.environ.get('MINIO_BUCKET_NAME'),
+                "default_acl": "public-read",
+                "url_protocol": "http:",
+                "gzip": True,
+                "file_overwrite": False,
+            }
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
