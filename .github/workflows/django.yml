@@ -6,8 +6,36 @@ on:
   pull_request:
     branches: [ "master" ]
 
+env:
+  DJANGO_SECRET_KEY: 908r12nuinxdu1y345ui3yx190245123yx450234x53y4
+  DJANGO_DEBUG: 0
+  DATABASE_NAME: food
+  DATABASE_USER: food_user
+  DATABASE_PASSWORD: food_password
+  DATABASE_HOST: localhost
+  REDIS_CACHE_URL: redis://localhost:6379/0
+  EMAIL_HOST_USER: asdasdasd
+  DEFAULT_FROM_EMAIL: sadasdasd
+  EMAIL_HOST_PASSWORD: 123123123123
+  CELERY_BROKER_URL: amqp://rabbit_user:rabbit_password@localhost:5672/food
+  CELERY_RESULT_BACKEND: redis://localhost:6379/1
+
 jobs:
   build:
+
+    services:
+      database:
+        image: postgres:16.2
+        ports: 
+          - "5432:5432"
+        env:
+          POSTGRES_DB: food
+          POSTGRES_USER: food_user
+          POSTGRES_PASSWORD: food_password
+      redis:
+        image: redis:latest
+        ports:
+          - "6379:6379"
 
     runs-on: ubuntu-latest
     strategy:
@@ -23,10 +51,12 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install Dependencies
       run: |
+        cd food
         python -m pip install --upgrade pip
         pip install poetry
         poetry config virtualenvs.create false
         poetry install --with dev --no-interaction
     - name: Run Tests
       run: |
+        cd food
         python manage.py test
