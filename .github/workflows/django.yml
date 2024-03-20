@@ -30,4 +30,5 @@ jobs:
         poetry install --with dev --no-interaction
     - name: Run Tests
       run: |
+        cd food
         python manage.py test
