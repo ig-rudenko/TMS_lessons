@@ -19,9 +19,10 @@ env:
   EMAIL_HOST_PASSWORD: 123123123123
   CELERY_BROKER_URL: amqp://rabbit_user:rabbit_password@localhost:5672/food
   CELERY_RESULT_BACKEND: redis://localhost:6379/1
+  DOCKERHUB_IMAGE_NAME: food
 
 jobs:
-  build:
+  test:
 
     services:
       database:
@@ -36,6 +37,16 @@ jobs:
         image: redis:latest
         ports:
           - "6379:6379"
+
+      broker:
+        image: rabbitmq:3.13.0-management
+        env:
+          RABBITMQ_DEFAULT_USER: rabbit_user
+          RABBITMQ_DEFAULT_PASS: rabbit_password
+          RABBITMQ_DEFAULT_VHOST: food
+          RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: -rabbit log_levels [{connection,error},{default,error}] disk_free_limit 2147483648
+        ports:
+          - "5672:5672"
 
     runs-on: ubuntu-latest
     strategy:
@@ -61,3 +72,31 @@ jobs:
         cd food
         mkdir -p media/images
         python manage.py test
+
+  build-docker-image:
+    needs: ["test"]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.DOCKERHUB_IMAGE_NAME }}:latest
