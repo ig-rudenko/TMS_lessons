@@ -12,6 +12,19 @@ services:
     depends_on:
       - backend-1
 
+  tg-bot:
+    image: food-tg-bot:0.1
+    build: ../tg_bot
+    restart: always
+    environment:
+      BOT_TOKEN: "00980909:ddcddjhffhfkfufyufuft"
+      POSTGRES_USER: food_user
+      POSTGRES_PASSWORD: food_password
+      POSTGRES_DB: food
+      POSTGRES_HOST: database
+    volumes:
+      - "media:/app/media"
+
   database:
     image: postgres:16.2
     restart: always
@@ -19,6 +32,9 @@ services:
       POSTGRES_USER: food_user
       POSTGRES_PASSWORD: food_password
       POSTGRES_DB: food
+
+    ports:
+      - "5433:5432"
 
     volumes:
       - "./compose/pg_data:/var/lib/postgresql/data"
@@ -61,6 +77,7 @@ services:
     volumes:
       - "./static:/app/static"
       - "./app:/app/app"
+      - "./users:/app/users"
       - "./food:/app/food"
       - "./templates:/app/templates"
 
