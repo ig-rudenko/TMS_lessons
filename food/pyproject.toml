@@ -32,14 +32,6 @@ django-storages = "^1.14.2"
 boto3 = "^1.34.64"
 
 
-[tool.poetry.group.dev.dependencies]
-mypy = "^1.8.0"
-django-stubs = "^4.2.7"
-celery-types = "^0.22.0"
-djangorestframework-stubs = "^3.14.5"
-drf-yasg-stubs = "^0.1.4"
-types-pillow = "^10.2.0.20240213"
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
