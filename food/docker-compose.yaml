@@ -8,22 +8,22 @@ services:
     - "80:80"
     volumes:
     - "./static:/var/www/static"
-    - "./compose/nginx/default.conf:/etc/nginx/conf.d/default.conf"
+    - "./compose/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro"
     depends_on:
       - backend-1
 
-  tg-bot:
-    image: food-tg-bot:0.1
-    build: ../tg_bot
-    restart: always
-    environment:
-      BOT_TOKEN: "00980909:ddcddjhffhfkfufyufuft"
-      POSTGRES_USER: food_user
-      POSTGRES_PASSWORD: food_password
-      POSTGRES_DB: food
-      POSTGRES_HOST: database
-    volumes:
-      - "media:/app/media"
+#  tg-bot:
+#    image: food-tg-bot:0.1
+#    build: ../tg_bot
+#    restart: always
+#    environment:
+#      BOT_TOKEN: "00980909:ddcddjhffhfkfufyufuft"
+#      POSTGRES_USER: food_user
+#      POSTGRES_PASSWORD: food_password
+#      POSTGRES_DB: food
+#      POSTGRES_HOST: database
+#    volumes:
+#      - "media:/app/media"
 
   database:
     image: postgres:16.2
@@ -57,7 +57,7 @@ services:
     image: food:0.1
     restart: always
     build: .
-    command: poetry run python manage.py runserver 0.0.0.0:8000
+    command: /bin/sh run.sh
     environment:
       DJANGO_SUPERUSER_EMAIL: admin@example.com
       DJANGO_SUPERUSER_USERNAME: admin
@@ -76,10 +76,6 @@ services:
       - minio-balancer
     volumes:
       - "./static:/app/static"
-      - "./app:/app/app"
-      - "./users:/app/users"
-      - "./food:/app/food"
-      - "./templates:/app/templates"
 
   avatar:
     image: avatar:0.1
@@ -121,6 +117,19 @@ services:
       - cache
       - celery-backend
 
+  celery-beat:
+    image: food:0.1
+    build: .
+    restart: always
+    command: celery -A food beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    env_file:
+      - compose/.compose.env
+    depends_on:
+      - database
+      - broker
+      - cache
+      - celery-backend
+
   celery-flower:
     image: food:0.1
     build: .
@@ -149,6 +158,8 @@ services:
 
     ports:
       - "15672:15672"
+    volumes:
+      - "./rabbitmq:/var/lib/rabbitmq"
 
   influxdb:
     image: influxdb:1.8-alpine
@@ -166,7 +177,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./compose/prometheus.yaml:/etc/prometheus/prometheus.yaml
+      - ./compose/prometheus.yaml:/etc/prometheus/prometheus.yaml:ro
     command:
       - '--config.file=/etc/prometheus/prometheus.yaml'
 
